@@ -1,6 +1,8 @@
 package com.gongfuzhu.autotools.core.annotation.aop;
 
+import com.epam.reportportal.listeners.ItemStatus;
 import com.gongfuzhu.autotools.core.annotation.Report;
+import com.gongfuzhu.autotools.core.annotation.agen.ReportPortalServer;
 import com.gongfuzhu.autotools.core.selenium.MyWebDriverListener;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -11,6 +13,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringDecorator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedWriter;
@@ -24,43 +27,29 @@ import java.util.Date;
 @Aspect
 @Log4j2
 public class ReportAop {
-    private ThreadLocal<String> batchThreadLocal = ThreadLocal.withInitial(() -> null);
 
 
-    @Pointcut(value = "@annotation(annotation.Report)")
-    public void point() {
+    @Autowired
+    ReportPortalServer reportPortalServer;
+
+    @Pointcut("@annotation(report)")
+    public void point(Report report) {
     }
 
-    @Around("point()")
-    public Object doAround(ProceedingJoinPoint pjp) {
+    @Around("point(report)")
+    public Object doAround(ProceedingJoinPoint pjp, Report report) {
 
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
-        if (method == null) {
-            return null;
-        }
 
-        Report annotation = method.getAnnotation(Report.class);
+        String key = pjp.getTarget().getClass().getName();
+        log.info("方法名称{}", method);
 
-        String jarDir = System.getProperty("user.dir") + File.separator + annotation.fileName();
+        reportPortalServer.startLaunch();
+        reportPortalServer.startTestSuite("测试测试", "这里是描述",key);
 
-        long delayTime = annotation.delayTime();
-        boolean screnShot = annotation.screnShot();
-        String scene = annotation.scene();
-        MyWebDriverListener seleniumListener = null;
 
         Object[] args = pjp.getArgs();
-
-        for (int i = 0; i < args.length; i++) {
-            if (args[i] instanceof WebDriver) {
-                WebDriver arg = (WebDriver) args[i];
-                seleniumListener = new MyWebDriverListener();
-                seleniumListener.setTime(delayTime);
-                seleniumListener.setScreenshot(screnShot);
-                seleniumListener.setSavePath(jarDir);
-                new EventFiringDecorator(seleniumListener).decorate(arg);
-            }
-        }
 
 
         Object proceed = null;
@@ -69,30 +58,19 @@ public class ReportAop {
             proceed = pjp.proceed(args);
         } catch (Throwable e) {
             e.printStackTrace();
-            result(jarDir, String.format("场景：%s 执行失败 ", scene));
+            log.info(e.toString());
+            reportPortalServer.finishTestSuite(ItemStatus.FAILED, key);
             return proceed;
+        }finally {
+            reportPortalServer.finishLaunch();
         }
+        log.info("方法被执行");
+        reportPortalServer.finishTestSuite(ItemStatus.PASSED, key);
 
-        result(jarDir, String.format("场景：%s 执行成功 ", scene));
 
         return proceed;
 
     }
 
-
-    @SneakyThrows
-    private void result(String filePath, String text) {
-
-        StringBuffer stringBuffer = new StringBuffer(text);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
-        String format = simpleDateFormat.format(new Date());
-        stringBuffer.append(format);
-        File file = new File(filePath);
-        file.mkdirs();
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file.getPath() + File.separator + "result.txt", true));
-        bufferedWriter.newLine();
-        bufferedWriter.write(stringBuffer.toString());
-        bufferedWriter.close();
-    }
 
 }

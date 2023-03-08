@@ -17,7 +17,7 @@ import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
 import com.epam.ta.reportportal.ws.model.launch.Mode;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
-import lombok.Data;
+import lombok.Getter;
 import org.springframework.context.annotation.Import;
 
 import javax.annotation.Nonnull;
@@ -25,22 +25,22 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.gongfuzhu.autotools.core.annotation.agen.ItemTreeUtils.createKey;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@Import(StepAspect.class)
-public class ReportPortalConfig {
+public class ReportPortalServer {
 
+//todo 重新些考慮多綫程情況
     public static final TestItemTree ITEM_TREE = new TestItemTree();
+
     private static volatile ReportPortal REPORT_PORTAL;
     private final MemoizingSupplier<Launch> launch;
     private volatile Thread shutDownHook;
 
     private final AtomicBoolean isLaunchFailed = new AtomicBoolean();
 
-    public ReportPortalConfig(@Nonnull final ReportPortal reportPortal) {
+    public ReportPortalServer(@Nonnull final ReportPortal reportPortal) {
         this.REPORT_PORTAL = reportPortal;
         this.launch = new MemoizingSupplier<>(() -> {
             StartLaunchRQ startRq = buildStartLaunchRq(reportPortal.getParameters());
@@ -71,31 +71,32 @@ public class ReportPortalConfig {
     }
 
 
-    public Maybe<String> startTestSuite(String suiteName, String suiteDesc) {
+    public Maybe<String> startTestSuite(String suiteName, String suiteDesc, String key) {
         StartTestItemRQ rq = buildStartItemRq(suiteName, suiteDesc, ItemType.SUITE);
         Launch myLaunch = launch.get();
         final Maybe<String> item = myLaunch.startTestItem(rq);
-        addToTree(suiteName, item);
+        addToTree(key, item);
         return item;
     }
 
 
-    public void finishTestSuite(ItemStatus status, String suiteName) {
-        TestItemTree.TestItemLeaf testItemLeaf = ITEM_TREE.getTestItems().get(createKey(suiteName));
+    public void finishTestSuite(ItemStatus status, String key) {
+        TestItemTree.TestItemLeaf testItemLeaf = ITEM_TREE.getTestItems().get(createKey(key));
         Maybe<String> rpId = testItemLeaf.getItemId();
         Launch myLaunch = launch.get();
         if (null != rpId) {
             FinishTestItemRQ rq = buildFinishTestSuiteRq(status);
             myLaunch.finishTestItem(rpId, rq);
         }
-        removeFromTree(suiteName);
+        removeFromTree(key);
     }
 
 
-    public Maybe<String> startTest(String testName, String testDesc, Maybe<String> parentId, String testKey) {
+    public Maybe<String> startTest(String testName, String testDesc, String parentKey, String testKey) {
+        TestItemTree.TestItemLeaf testItemLeaf = ITEM_TREE.getTestItems().get(createKey(parentKey));
         StartTestItemRQ rq = buildStartItemRq(testName, testDesc, ItemType.TEST);
         Launch myLaunch = launch.get();
-        final Maybe<String> testID = myLaunch.startTestItem(parentId, rq);
+        final Maybe<String> testID = myLaunch.startTestItem(testItemLeaf.getItemId(), rq);
         addToTree(testKey, testID);
         return testID;
     }
@@ -108,7 +109,7 @@ public class ReportPortalConfig {
         removeFromTree(testKey);
     }
 
-    public static ReportPortalConfig reportPortal(String endpoint, String uuid, String project, String launchName, String launchDesc) {
+    public static ReportPortalServer reportPortal(String endpoint, String uuid, String project, String launchName, String launchDesc) {
 
         ListenerParameters listenerParameters = new ListenerParameters();
         listenerParameters.setBaseUrl(endpoint);
@@ -122,7 +123,7 @@ public class ReportPortalConfig {
         ReportPortal reportPortal = ReportPortal.builder()
                 .withParameters(listenerParameters)
                 .build();
-        return new ReportPortalConfig(reportPortal);
+        return new ReportPortalServer(reportPortal);
     }
 
 

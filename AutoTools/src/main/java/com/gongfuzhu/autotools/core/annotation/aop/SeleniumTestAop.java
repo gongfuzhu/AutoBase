@@ -38,12 +38,12 @@ public class SeleniumTestAop {
     @Autowired
     InitiWebDriver initiWebDriver;
 
-    @Pointcut(value = "@annotation(annotation.SeleniumTest)")
-    public void point() {
+    @Pointcut(value = "@annotation(seleniumTest)")
+    public void point(SeleniumTest seleniumTest) {
     }
 
-    @Around("point()")
-    public Object doAround(ProceedingJoinPoint pjp) {
+    @Around("point(seleniumTest)")
+    public Object doAround(ProceedingJoinPoint pjp,SeleniumTest seleniumTest) {
 
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
@@ -51,13 +51,12 @@ public class SeleniumTestAop {
             return null;
         }
 
-        SeleniumTest annotation = method.getAnnotation(SeleniumTest.class);
 
-        DriverManagerType driverManagerType = annotation.driverType();
-        boolean docker = annotation.isDocker();
-        boolean report = annotation.report();
-        boolean driver = annotation.isDriver();
-        SeleniumTest.ChromeOption option = annotation.option();
+        DriverManagerType driverManagerType = seleniumTest.driverType();
+        boolean docker = seleniumTest.isDocker();
+        boolean report = seleniumTest.report();
+        boolean driver = seleniumTest.isDriver();
+        SeleniumTest.ChromeOption option = seleniumTest.option();
         if (driver) {
             if (docker) {
                 initiWebDriver.dockerDriver(driverManagerType, option.getAbstractDriverOptions());

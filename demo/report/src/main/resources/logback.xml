@@ -1,0 +1,28 @@
+<configuration>
+    <!-- 定义日志输出格式 -->
+    <property name="LOG_PATTERN" value="%d{HH:mm:ss.SSS} [%t] %-5level -dd %msg%n" />
+<!--    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5level [%thread] %logger{50} -dd %msg%n" />-->
+
+    <!-- 输出到控制台 -->
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+
+    <appender name="RP" class="com.epam.reportportal.logback.appender.ReportPortalAppender">
+        <encoder>
+            <!--Best practice: don't put time and logging level to the final message. Appender do this for you-->
+            <pattern>%d{HH:mm:ss.SSS} [%t] %-5level - %msg%n</pattern>
+            <pattern>[%t] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- 日志级别配置 -->
+    <root level="INFO">
+        <appender-ref ref="consoleAppender" />
+        <appender-ref ref="RP" />
+    </root>
+</configuration>

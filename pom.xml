@@ -16,6 +16,12 @@
     </properties>
     <modules>
         <module>config</module>
+        <module>AutoTools</module>
+        <module>data/JpaData</module>
+        <module>data/BaseData</module>
+        <module>data/ElasticSearchData</module>
+        <module>data/MongodbData</module>
+        <module>data/RedisData</module>
     </modules>
 
 </project>

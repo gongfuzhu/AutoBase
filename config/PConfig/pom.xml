@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.1</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.gongfuzhu</groupId>
+    <artifactId>PConfig</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>PConfig</name>
+    <packaging>pom</packaging>
+    <description>版本号管理</description>
+    <properties>
+
+        <!-- 自动化-->
+        <appium.version>8.3.0</appium.version>
+        <selenium.version>4.8.1</selenium.version>
+        <bonigarcia.version>5.3.2</bonigarcia.version>
+        <jsoup.version>1.15.3</jsoup.version>
+
+        <!-- 项目编码 -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!--JDK版本-->
+        <java.version>11</java.version>
+
+        <jaxb-api.version>2.3.1</jaxb-api.version>
+        <spring-boot.version>2.7.1</spring-boot.version>
+        <spring-boot-starter-data-jpa.version>2.7.1</spring-boot-starter-data-jpa.version>
+
+        <spring-data-jpa.version>2.7.1</spring-data-jpa.version>
+        <groovy.version>3.0.9</groovy.version>
+    </properties>
+
+
+
+    <repositories>
+
+        <!-- 阿里-->
+        <repository>
+            <id>nexus</id>
+            <name>nexus</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+
+
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+
+    </repositories>
+
+
+    <pluginRepositories>
+
+        <!-- Needed for latest Groovy Eclipse version -->
+        <pluginRepository>
+            <id>nexus</id>
+            <name>nexus</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </pluginRepository>
+
+
+        <!-- Needed for latest Groovy Eclipse version -->
+        <pluginRepository>
+            <id>bintray</id>
+            <name>Groovy Bintray</name>
+            <url>https://dl.bintray.com/groovy/maven</url>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+
+</project>

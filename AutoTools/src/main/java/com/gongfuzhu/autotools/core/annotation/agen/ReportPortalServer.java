@@ -36,7 +36,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ReportPortalServer {
 
     public static final ThreadLocal<ReportPortalServer> CURRENT_ReportPortalServer = new InheritableThreadLocal<>();
-//    public final TestItemTree ITEM_TREE = new TestItemTree();
     private final MemoizingSupplier<Launch> launch;
     private volatile Thread shutDownHook;
 
@@ -92,9 +91,10 @@ public class ReportPortalServer {
     }
 
 
-    public Maybe<String> startTest(String testName, String testDesc) {
+    public Maybe<String> startTest(String testName, String testDesc,Set<ItemAttributesRQ> attributes) {
         Maybe<String> rpId = launch.get().getStepReporter().getParent();
         StartTestItemRQ rq = buildStartItemRq(testName, testDesc, ItemType.TEST);
+        rq.setAttributes(attributes);
         Launch myLaunch = launch.get();
         final Maybe<String> testID = myLaunch.startTestItem(rpId, rq);
         return testID;
@@ -108,12 +108,12 @@ public class ReportPortalServer {
     }
 
 
-    public void sendLog(Maybe<String> itemId, String desc, LogLevel level) {
-        ItemTreeReporter.sendLog(launch.get().getClient(), level.name(), desc, Calendar.getInstance().getTime(), launch.get().getLaunch(), TestItemTree.createTestItemLeaf(itemId));
+    public void sendLog(String desc, LogLevel level) {
+        ItemTreeReporter.sendLog(launch.get().getClient(), level.name(), desc, Calendar.getInstance().getTime(), launch.get().getLaunch(), TestItemTree.createTestItemLeaf(launch.get().getStepReporter().getParent()));
     }
 
-    public void sendLog(Maybe<String> itemId, String desc, LogLevel level, File file) {
-        ItemTreeReporter.sendLog(launch.get().getClient(), level.name(), desc, Calendar.getInstance().getTime(), file, launch.get().getLaunch(), TestItemTree.createTestItemLeaf(itemId));
+    public void sendLog( String desc, LogLevel level, File file) {
+        ItemTreeReporter.sendLog(launch.get().getClient(), level.name(), desc, Calendar.getInstance().getTime(), file, launch.get().getLaunch(), TestItemTree.createTestItemLeaf(launch.get().getStepReporter().getParent()));
 
 
     }

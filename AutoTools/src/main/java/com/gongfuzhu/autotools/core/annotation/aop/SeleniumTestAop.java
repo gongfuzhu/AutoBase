@@ -1,9 +1,5 @@
 package com.gongfuzhu.autotools.core.annotation.aop;
 
-//import com.aventstack.extentreports.ExtentReports;
-//import com.aventstack.extentreports.ExtentTest;
-//import com.aventstack.extentreports.reporter.ExtentKlovReporter;
-//import com.mongodb.MongoClientURI;
 import com.gongfuzhu.autotools.core.annotation.SeleniumTest;
 import com.gongfuzhu.autotools.core.selenium.InitiWebDriver;
 import io.github.bonigarcia.wdm.config.DriverManagerType;
@@ -66,24 +62,7 @@ public class SeleniumTestAop {
             }
         }
 
-//        ExtentReports extent = null;
         if (report) {
-
-//            ExtentKlovReporter klovReporter = new ExtentKlovReporter("tiktok", "报告名称");
-//
-//            MongoClientURI mongoClientURI = new MongoClientURI("mongodb://klov:klov@192.168.8.55:27017/klov");
-//
-//            // Set Klov Server URL
-//            klovReporter.initMongoDbConnection(mongoClientURI);
-//
-//            // Set Klov Server URL (Can be External too)
-//            klovReporter.initKlovServerConnection("http://127.0.0.1:80");
-
-            // Create ExtentReports and attach Klov Reporter
-//            extent = new ExtentReports();
-////            extent.attachReporter(klovReporter);
-//            ExtentTest test = extent.createTest(method.getName());
-//            initiWebDriver.startLinsen(test);
 
         }
 
@@ -106,7 +85,6 @@ public class SeleniumTestAop {
         }finally {
             initiWebDriver.closeDriver();
         }
-//        extent.flush();
         return proceed;
 
     }

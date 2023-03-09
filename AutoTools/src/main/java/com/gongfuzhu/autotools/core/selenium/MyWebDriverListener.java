@@ -1,6 +1,8 @@
 package com.gongfuzhu.autotools.core.selenium;
 
+import com.epam.reportportal.service.ReportPortal;
 import com.gongfuzhu.autotools.core.selenium.util.WebDriverUtil;
+import com.google.common.io.Resources;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -9,41 +11,33 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.support.events.WebDriverListener;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FilterWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Log4j2
-@Getter
-@Setter
 public class MyWebDriverListener implements WebDriverListener {
-//    private ExtentTest extentTest;
+    private WebDriver wb;
 
-    private int step = 1;
-
-    private boolean screenshot = false;
-
-    private long time = 1000;
-
-    private String savePath;
+    public MyWebDriverListener(WebDriver wb) {
+        this.wb = wb;
+    }
 
     // 全局设置
     @Override
     public void beforeAnyCall(Object target, Method method, Object[] args) {
-        log.info("------------------------------------beforeAnyCall------------------------------------");
-        log.info("方法名：{}", method.getName());
-        log.info("target:{}", target.toString());
 
 
     }
 
     @Override
     public void afterAnyCall(Object target, Method method, Object[] args, Object result) {
-//        extentTest.log(Status.INFO,"方法名称："+method.getName()+"参数"+result.toString());
 
     }
 
@@ -67,16 +61,19 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterGet(WebDriver driver, String url) {
-        String screenshotAs = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64);
-//        extentTest.addScreenCaptureFromBase64String(screenshotAs,"打开网页：" + url);
+        log.info("打开网页：{}", url);
+
     }
 
     @Override
     public void beforeGetCurrentUrl(WebDriver driver) {
+        log.info("获取当前链接");
     }
 
     @Override
     public void afterGetCurrentUrl(String result, WebDriver driver) {
+        log.info("获取当前链接：{}",result);
+
     }
 
     @Override
@@ -85,18 +82,22 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterGetTitle(WebDriver driver, String result) {
+        log.info("获取网页title:{}",result);
     }
 
     @Override
     public void beforeFindElement(WebDriver driver, By locator) {
+        log.info("查找元素：{}", locator.toString());
     }
 
     @Override
     public void afterFindElement(WebDriver driver, By locator, WebElement result) {
+        log.info("afterFindElement:{}",result.getAriaRole());
     }
 
     @Override
     public void beforeFindElements(WebDriver driver, By locator) {
+        log.info("查找多个元素：{}", locator.toString());
     }
 
     @Override
@@ -105,14 +106,24 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void beforeGetPageSource(WebDriver driver) {
+
     }
 
+    @SneakyThrows
     @Override
     public void afterGetPageSource(WebDriver driver, String result) {
+        File tempFile = File.createTempFile("PageSource", "html");
+
+        FilterWriter.nullWriter();
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(tempFile));
+        bufferedWriter.write(result);
+        bufferedWriter.close();
+        infoSc(tempFile,"获取网页源码");
     }
 
     @Override
     public void beforeClose(WebDriver driver) {
+        log.info("关闭浏览器");
     }
 
     @Override
@@ -121,6 +132,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void beforeQuit(WebDriver driver) {
+        log.info("关闭程序");
     }
 
     @Override
@@ -133,6 +145,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterGetWindowHandles(WebDriver driver, Set<String> result) {
+        log.info("afterGetWindowHandles：{}",result.toString());
     }
 
     @Override
@@ -141,30 +154,37 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterGetWindowHandle(WebDriver driver, String result) {
+        log.info("afterGetWindowHandle：{}",result);
     }
 
     @Override
     public void beforeExecuteScript(WebDriver driver, String script, Object[] args) {
+        log.info("执行脚本：{}", script);
     }
 
     @Override
     public void afterExecuteScript(WebDriver driver, String script, Object[] args, Object result) {
+        infoSc(driver, "afterExecuteScript");
     }
 
     @Override
     public void beforeExecuteAsyncScript(WebDriver driver, String script, Object[] args) {
+        log.info("执行异步脚本：{}", script);
     }
 
     @Override
     public void afterExecuteAsyncScript(WebDriver driver, String script, Object[] args, Object result) {
+        infoSc(driver, "afterExecuteAsyncScript");
     }
 
     @Override
     public void beforePerform(WebDriver driver, Collection<Sequence> actions) {
+        log.info("beforePerform：{}",actions.toArray());
     }
 
     @Override
     public void afterPerform(WebDriver driver, Collection<Sequence> actions) {
+        infoSc(wb,"afterPerform");
     }
 
     @Override
@@ -189,34 +209,47 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void beforeClick(WebElement element) {
+        infoSc(element.getScreenshotAs(OutputType.FILE), "beforeClick");
     }
 
     @Override
     public void afterClick(WebElement element) {
+        infoSc(wb, "afterClick");
     }
 
     @Override
     public void beforeSubmit(WebElement element) {
+        infoSc(element.getScreenshotAs(OutputType.FILE), "beforeSubmit");
     }
 
     @Override
     public void afterSubmit(WebElement element) {
+        infoSc(wb, "afterSubmit");
     }
 
     @Override
     public void beforeSendKeys(WebElement element, CharSequence... keysToSend) {
+        StringBuilder stringBuilder = new StringBuilder();
+        Arrays.stream(keysToSend).forEach(it->{
+            stringBuilder.append(it);
+        });
+        infoSc(element.getScreenshotAs(OutputType.FILE), "输入：" + stringBuilder);
     }
 
     @Override
     public void afterSendKeys(WebElement element, CharSequence... keysToSend) {
+        infoSc(wb, "afterSendKeys");
+
     }
 
     @Override
     public void beforeClear(WebElement element) {
+        infoSc(element.getScreenshotAs(OutputType.FILE), "beforeClear");
     }
 
     @Override
     public void afterClear(WebElement element) {
+        infoSc(wb, "afterClear");
     }
 
     @Override
@@ -225,6 +258,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterGetTagName(WebElement element, String result) {
+        log.info("afterGetTagName：{}",result);
     }
 
     @Override
@@ -233,6 +267,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterGetAttribute(WebElement element, String name, String result) {
+        log.info("afterGetAttribute：{}-{}",name,result);
     }
 
     @Override
@@ -241,6 +276,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterIsSelected(WebElement element, boolean result) {
+        log.info("afterIsSelected：{}",result);
     }
 
     @Override
@@ -249,6 +285,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterIsEnabled(WebElement element, boolean result) {
+        log.info("afterIsEnabled：{}",result);
     }
 
     @Override
@@ -257,6 +294,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterGetText(WebElement element, String result) {
+        log.info("获取文本：{}", result);
     }
 
     @Override
@@ -533,6 +571,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void beforeMaximize(WebDriver.Window window) {
+
     }
 
     @Override
@@ -548,42 +587,17 @@ public class MyWebDriverListener implements WebDriverListener {
     public void afterFullscreen(WebDriver.Window window) {
     }
 
-    @SneakyThrows
-    private void waitTime() {
-        Thread.sleep(time);
 
+    private void infoSc(WebDriver webDriver, String message) {
 
+        File screenshot = WebDriverUtil.screenshot(webDriver);
+        ReportPortal.emitLog(message, "info", new Date(), screenshot);
+    }
+
+    private void infoSc(File file, String message) {
+
+        ReportPortal.emitLog(message, "info", new Date(), file);
     }
 
 
-    private void screenshot(WebDriver driver, String text) {
-        log.info("截图方法被执行：{}", screenshot);
-
-        if (!screenshot) {
-            step++;
-            return;
-        }
-
-
-        String no = "No:";
-        no += step;
-
-        String fileName = step + "_" + text + ".png";
-
-
-        String content = no + " " + text;
-
-
-//        File file3 = new File(this.getClass().getResource("/").getPath());
-
-//        log.info("文件路径：",file3.getPath());
-
-//        String jarPath = SystemTool.getJarPath();
-//        String jarPath= JarTool.getJarDir();
-
-        WebDriverUtil.screenshot(driver, content, fileName, savePath);
-        step++;
-
-
-    }
 }

@@ -1,6 +1,7 @@
 package com.gongfuzhu.autotools.core.selenium;
 
 import com.gongfuzhu.autotools.core.selenium.mode.TaskMode;
+import com.gongfuzhu.autotools.core.selenium.options.ChromeGeneralOptions;
 import com.gongfuzhu.autotools.core.tools.SystemTool;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.bonigarcia.wdm.config.DriverManagerType;
@@ -9,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.events.EventFiringDecorator;
 
 import java.io.File;
 import java.time.Duration;
@@ -25,7 +27,9 @@ public class InitiWebDriver {
 
 
     public WebDriver getDriver() {
-
+        if (null == taskMode.get().getWebDriver()) {
+            localDriver(DriverManagerType.CHROME, ChromeGeneralOptions.getCapabilities());
+        }
         return taskMode.get().getWebDriver();
     }
 
@@ -53,6 +57,7 @@ public class InitiWebDriver {
             return taskMode.get().getWebDriver();
 
         }
+        startLinsen();
         return generalSettings(taskMode.get().getWebDriver());
     }
 
@@ -100,25 +105,25 @@ public class InitiWebDriver {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(20));
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(20));
 
+
         return driver;
 
     }
 
-//    @SneakyThrows
-//    public void startLinsen(ExtentTest extentTest) {
-//        //等待录制功能启动
-//        Thread.sleep(5000);
-//        WebDriver driver = getDriver();
-//        MyWebDriverListener myWebDriverListener = new MyWebDriverListener();
-//        myWebDriverListener.setExtentTest(extentTest);
-//
-//        EventFiringDecorator eventFiringDecorator = new EventFiringDecorator(myWebDriverListener);
-//        WebDriver decorate = eventFiringDecorator.decorate(driver);
-//        TaskMode taskMode1 = taskMode.get();
-//        taskMode1.setWebDriver(decorate);
-//
-//
-//    }
+    @SneakyThrows
+    private void startLinsen() {
+        //等待录制功能启动
+        Thread.sleep(5000);
+        WebDriver driver = getDriver();
+        MyWebDriverListener myWebDriverListener = new MyWebDriverListener(driver);
+
+        EventFiringDecorator eventFiringDecorator = new EventFiringDecorator(myWebDriverListener);
+        WebDriver decorate = eventFiringDecorator.decorate(driver);
+        TaskMode taskMode1 = taskMode.get();
+        taskMode1.setWebDriver(decorate);
+
+
+    }
 
 
 }

@@ -1,6 +1,6 @@
 package com.gongfuzhu.autotools.core.annotation;
 
-import com.gongfuzhu.autotools.core.selenium.options.GeneralChromeOptions;
+import com.gongfuzhu.autotools.core.selenium.options.ChromeGeneralOptions;
 import io.github.bonigarcia.wdm.config.DriverManagerType;
 import org.openqa.selenium.chrome.ChromeOptions;
 
@@ -44,9 +44,9 @@ public @interface SeleniumTest {
     enum ChromeOption {
 
 
-        notUserInfo(GeneralChromeOptions.getCapabilities()),
-        userInfod(GeneralChromeOptions.getUserCapabilities()),
-        H5(GeneralChromeOptions.getUserCapabilities());
+        notUserInfo(ChromeGeneralOptions.getCapabilities()),
+        userInfod(ChromeGeneralOptions.getUserCapabilities()),
+        H5(ChromeGeneralOptions.getUserCapabilities());
         private ChromeOptions abstractDriverOptions;
 
 

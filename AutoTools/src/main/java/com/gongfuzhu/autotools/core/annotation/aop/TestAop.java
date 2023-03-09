@@ -2,6 +2,7 @@ package com.gongfuzhu.autotools.core.annotation.aop;
 
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.service.Launch;
+import com.epam.reportportal.utils.AttributeParser;
 import com.gongfuzhu.autotools.core.annotation.Report;
 import com.gongfuzhu.autotools.core.annotation.Test;
 import com.gongfuzhu.autotools.core.annotation.agen.ReportPortalServer;
@@ -17,8 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.epam.reportportal.utils.properties.ListenerProperty.LAUNCH_ATTRIBUTES;
 
 @Aspect
 @Log4j2
@@ -32,17 +36,21 @@ public class TestAop {
     public Object doAround(ProceedingJoinPoint pjp, Test test) {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
-        Object[] args1 = pjp.getArgs();
 
-        Map<String, Object> keyValue = Map.of("描述", test.desc(), "方法", method.getName(), "参数",args1);
+        Object[] args1 = pjp.getArgs();
+        Parameter[] parameters = method.getParameters();
+
 
         String name = method.getName();
         String testName = test.testName().isEmpty() ? name : test.testName();
+        String desc = test.desc();
 
-        Json json = new Json();
-        String desc = json.toJson(keyValue);
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("方法名:").append(method.getName()).append(";");
+//        Json json = new Json();
+//        String desc = json.toJson();
         ReportPortalServer reportPortalServer = ReportPortalServer.CURRENT_ReportPortalServer.get();
-        reportPortalServer.startTest(testName, desc);
+        reportPortalServer.startTest(testName, desc, Collections.unmodifiableSet(AttributeParser.parseAsSet(stringBuilder.toString())));
 
         Object[] args = pjp.getArgs();
 
@@ -52,7 +60,6 @@ public class TestAop {
             proceed = pjp.proceed(args);
         } catch (Throwable e) {
             e.printStackTrace();
-            log.info(e.toString());
             reportPortalServer.finishTest(ItemStatus.FAILED);
             return proceed;
         }

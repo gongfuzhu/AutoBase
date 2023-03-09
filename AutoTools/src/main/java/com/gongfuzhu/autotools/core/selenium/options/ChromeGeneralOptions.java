@@ -6,7 +6,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.util.HashMap;
 
-public class GeneralChromeOptions {
+public class ChromeGeneralOptions {
 
 
     /**

@@ -15,7 +15,10 @@ public @interface Report {
      * 存放报告的文件名
      * @return
      */
-    String suitName() default "Report";
+    String suitName() default "";
+
+
+    String desc() default "";
 
 
 

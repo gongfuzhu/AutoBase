@@ -11,9 +11,14 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.openqa.selenium.json.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Aspect
 @Log4j2
@@ -26,20 +31,23 @@ public class TestAop {
     @Around("point(test)")
     public Object doAround(ProceedingJoinPoint pjp, Test test) {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
-        String methodKey = signature.getMethod().getName();
-        String classKey = pjp.getTarget().getClass().getName();
-        String concat = classKey.concat(methodKey);
+        Method method = signature.getMethod();
+        Object[] args1 = pjp.getArgs();
+
+        Map<String, Object> keyValue = Map.of("描述", test.desc(), "方法", method.getName(), "参数",args1);
+
+        String name = method.getName();
+        String testName = test.testName().isEmpty() ? name : test.testName();
+
+        Json json = new Json();
+        String desc = json.toJson(keyValue);
         ReportPortalServer reportPortalServer = ReportPortalServer.CURRENT_ReportPortalServer.get();
-
-
-        reportPortalServer.startTest(test.testName(), "名称描述");
-
+        reportPortalServer.startTest(testName, desc);
 
         Object[] args = pjp.getArgs();
 
 
         Object proceed = null;
-
         try {
             proceed = pjp.proceed(args);
         } catch (Throwable e) {
@@ -48,9 +56,7 @@ public class TestAop {
             reportPortalServer.finishTest(ItemStatus.FAILED);
             return proceed;
         }
-        log.info("测试通过");
         reportPortalServer.finishTest(ItemStatus.PASSED);
-
 
         return proceed;
 

@@ -7,12 +7,15 @@ import com.gongfuzhu.autotools.core.annotation.agen.ReportPortalServer;
 import com.gongfuzhu.autotools.core.selenium.MyWebDriverListener;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.json.Json;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,14 +24,17 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @Aspect
 @Log4j2
 public class ReportAop {
-
 
 
     @Autowired
@@ -43,13 +49,17 @@ public class ReportAop {
 
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
+        String suitName = report.suitName().isEmpty() ? signature.getName() : report.suitName();
 
-        String key = pjp.getTarget().getClass().getName();
-        log.info("方法名称{}", method);
+
+        Object[] args1 = pjp.getArgs();
+        String desc = report.desc();
+        Map<String, Object> keyValue = Map.of("描述", desc, "方法", method.getName(), "参数", args1);
+        Json json = new Json();
+
 
         ReportPortalServer reportPortalServer = new ReportPortalServer(reportPortal);
-
-        reportPortalServer.startTestSuite("xx模块", "这里是描述");
+        reportPortalServer.startTestSuite(suitName, json.toJson(keyValue));
 
 
         Object[] args = pjp.getArgs();
@@ -65,7 +75,7 @@ public class ReportAop {
             log.info(e.toString());
             reportPortalServer.finishTestSuite(ItemStatus.FAILED);
             return proceed;
-        }finally {
+        } finally {
             reportPortalServer.finishLaunch();
         }
 

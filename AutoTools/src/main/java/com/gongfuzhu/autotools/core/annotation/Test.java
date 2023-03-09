@@ -9,5 +9,7 @@ import java.lang.annotation.*;
 @Inherited
 public @interface Test {
 
-    String testName() default "默认测试名称";
+    String testName() default "";
+
+    String desc() default "";
 }

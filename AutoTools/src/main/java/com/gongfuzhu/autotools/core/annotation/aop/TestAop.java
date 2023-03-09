@@ -18,8 +18,6 @@ import java.lang.reflect.Method;
 @Aspect
 @Log4j2
 public class TestAop {
-    @Autowired
-    ReportPortalServer reportPortalServer;
 
     @Pointcut("@annotation(test)")
     public void point(Test test) {
@@ -31,7 +29,7 @@ public class TestAop {
         String methodKey = signature.getMethod().getName();
         String classKey = pjp.getTarget().getClass().getName();
         String concat = classKey.concat(methodKey);
-
+        ReportPortalServer reportPortalServer = ReportPortalServer.CURRENT_ReportPortalServer.get();
 
 
         reportPortalServer.startTest(test.testName(), "名称描述", classKey, concat);

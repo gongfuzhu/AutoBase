@@ -1,6 +1,7 @@
 package com.gongfuzhu.autotools.core.annotation.aop;
 
 import com.epam.reportportal.listeners.ItemStatus;
+import com.epam.reportportal.service.ReportPortal;
 import com.gongfuzhu.autotools.core.annotation.Report;
 import com.gongfuzhu.autotools.core.annotation.agen.ReportPortalServer;
 import com.gongfuzhu.autotools.core.selenium.MyWebDriverListener;
@@ -29,8 +30,9 @@ import java.util.Date;
 public class ReportAop {
 
 
+
     @Autowired
-    ReportPortalServer reportPortalServer;
+    ReportPortal reportPortal;
 
     @Pointcut("@annotation(report)")
     public void point(Report report) {
@@ -45,7 +47,9 @@ public class ReportAop {
         String key = pjp.getTarget().getClass().getName();
         log.info("方法名称{}", method);
 
+        ReportPortalServer reportPortalServer = new ReportPortalServer(reportPortal);
         reportPortalServer.startLaunch();
+
         reportPortalServer.startTestSuite("测试测试", "这里是描述",key);
 
 

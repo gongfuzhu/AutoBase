@@ -17,9 +17,11 @@ import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
 import com.epam.ta.reportportal.ws.model.launch.Mode;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
+import io.reactivex.internal.operators.maybe.MaybeCache;
 import lombok.Getter;
 import org.springframework.context.annotation.Import;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.*;
@@ -31,26 +33,27 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ReportPortalServer {
 
-//todo 重新些考慮多綫程情況
-    public static final TestItemTree ITEM_TREE = new TestItemTree();
-
-    private static volatile ReportPortal REPORT_PORTAL;
+    public static final ThreadLocal<ReportPortalServer> CURRENT_ReportPortalServer = new InheritableThreadLocal<>();
+    public final TestItemTree ITEM_TREE = new TestItemTree();
     private final MemoizingSupplier<Launch> launch;
     private volatile Thread shutDownHook;
 
     private final AtomicBoolean isLaunchFailed = new AtomicBoolean();
 
     public ReportPortalServer(@Nonnull final ReportPortal reportPortal) {
-        this.REPORT_PORTAL = reportPortal;
         this.launch = new MemoizingSupplier<>(() -> {
             StartLaunchRQ startRq = buildStartLaunchRq(reportPortal.getParameters());
             startRq.setStartTime(Calendar.getInstance().getTime());
             Launch newLaunch = reportPortal.newLaunch(startRq);
             shutDownHook = getShutdownHook(() -> newLaunch);
             Runtime.getRuntime().addShutdownHook(shutDownHook);
+
+            CURRENT_ReportPortalServer.set(this);
             return newLaunch;
         });
     }
+
+
 
     public void startLaunch() {
         Maybe<String> launchId = launch.get().start();
@@ -70,34 +73,38 @@ public class ReportPortalServer {
         ITEM_TREE.getTestItems().put(createKey(key), TestItemTree.createTestItemLeaf(item));
     }
 
+    private void addToTree(String key, Maybe<String> item, Maybe<String> parentItem) {
+        ITEM_TREE.getTestItems().put(createKey(key), TestItemTree.createTestItemLeaf(parentItem, item));
+    }
 
-    public Maybe<String> startTestSuite(String suiteName, String suiteDesc, String key) {
+
+    public Maybe<String> startTestSuite(String suiteName, String suiteDesc, String suitKey) {
         StartTestItemRQ rq = buildStartItemRq(suiteName, suiteDesc, ItemType.SUITE);
         Launch myLaunch = launch.get();
         final Maybe<String> item = myLaunch.startTestItem(rq);
-        addToTree(key, item);
+        addToTree(suitKey, item, ITEM_TREE.getLaunchId());
         return item;
     }
 
 
-    public void finishTestSuite(ItemStatus status, String key) {
-        TestItemTree.TestItemLeaf testItemLeaf = ITEM_TREE.getTestItems().get(createKey(key));
+    public void finishTestSuite(ItemStatus status, String suitKey) {
+        TestItemTree.TestItemLeaf testItemLeaf = ITEM_TREE.getTestItems().get(createKey(suitKey));
         Maybe<String> rpId = testItemLeaf.getItemId();
         Launch myLaunch = launch.get();
         if (null != rpId) {
             FinishTestItemRQ rq = buildFinishTestSuiteRq(status);
             myLaunch.finishTestItem(rpId, rq);
         }
-        removeFromTree(key);
+        removeFromTree(suitKey);
     }
 
 
-    public Maybe<String> startTest(String testName, String testDesc, String parentKey, String testKey) {
-        TestItemTree.TestItemLeaf testItemLeaf = ITEM_TREE.getTestItems().get(createKey(parentKey));
+    public Maybe<String> startTest(String testName, String testDesc, String testKey, String parentKey) {
+        TestItemTree.TestItemLeaf prentLeaf = ITEM_TREE.getTestItems().get(createKey(parentKey));
         StartTestItemRQ rq = buildStartItemRq(testName, testDesc, ItemType.TEST);
         Launch myLaunch = launch.get();
-        final Maybe<String> testID = myLaunch.startTestItem(testItemLeaf.getItemId(), rq);
-        addToTree(testKey, testID);
+        final Maybe<String> testID = myLaunch.startTestItem(prentLeaf.getItemId(), rq);
+        addToTree(testKey, testID, prentLeaf.getItemId());
         return testID;
     }
 
@@ -107,23 +114,6 @@ public class ReportPortalServer {
         FinishTestItemRQ rq = buildFinishTestRq(testContext);
         launch.get().finishTestItem(testItemLeaf.getItemId(), rq);
         removeFromTree(testKey);
-    }
-
-    public static ReportPortalServer reportPortal(String endpoint, String uuid, String project, String launchName, String launchDesc) {
-
-        ListenerParameters listenerParameters = new ListenerParameters();
-        listenerParameters.setBaseUrl(endpoint);
-        listenerParameters.setApiKey(uuid);
-        listenerParameters.setProjectName(project);
-        listenerParameters.setHttpLogging(false);
-        listenerParameters.setLaunchRunningMode(Mode.DEFAULT);
-        listenerParameters.setEnable(true);
-        listenerParameters.setLaunchName(launchName);
-        listenerParameters.setDescription(launchDesc);
-        ReportPortal reportPortal = ReportPortal.builder()
-                .withParameters(listenerParameters)
-                .build();
-        return new ReportPortalServer(reportPortal);
     }
 
 

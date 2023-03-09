@@ -16,7 +16,7 @@ public class TestService {
     @Autowired
     TestSetp testSetp;
     @Test(testName = "这是测试名称")
-    public void test01(){
+    public void test01(String aaa,int ddd){
 
         log.info("这是test01");
         log.info("这是test01");
@@ -24,6 +24,8 @@ public class TestService {
         testSetp.test();
 
     }
+
+
 
 
 

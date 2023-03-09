@@ -18,10 +18,10 @@ public class Testcontroller {
 
     TestService testService;
     @RequestMapping("log")
-    @Report
+    @Report(suitName = "登录模块",desc = "这还是描述")
     public void test(){
         log.info("这是日志1");
-        testService.test01();
+        testService.test01("这是参数",50);
 
     }
 }

@@ -3,10 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.gongfuzhu</groupId>
-    <artifactId>AutoBase</artifactId>
+    <artifactId>dataBase</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>AutoBase</name>
-    <description>AutoBase</description>
+    <name>dataBase</name>
+    <description>dataBase</description>
     <packaging>pom</packaging>
 
     <properties>
@@ -15,12 +15,11 @@
         <java.version>11</java.version>
     </properties>
     <modules>
-        <module>config</module>
-        <module>data</module>
-
-
-        <module>AutoTools</module>
-        <module>demo/report</module>
+        <module>BaseData</module>
+        <module>ElasticSearchData</module>
+        <module>JpaData</module>
+        <module>MongodbData</module>
+        <module>RedisData</module>
     </modules>
 
 </project>

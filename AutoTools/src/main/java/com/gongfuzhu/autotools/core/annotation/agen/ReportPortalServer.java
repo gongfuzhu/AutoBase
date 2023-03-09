@@ -19,6 +19,7 @@ import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
 import io.reactivex.internal.operators.maybe.MaybeCache;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Import;
 
 import javax.annotation.Nonnegative;
@@ -31,10 +32,11 @@ import java.util.function.Supplier;
 import static com.gongfuzhu.autotools.core.annotation.agen.ItemTreeUtils.createKey;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@Log4j2
 public class ReportPortalServer {
 
     public static final ThreadLocal<ReportPortalServer> CURRENT_ReportPortalServer = new InheritableThreadLocal<>();
-    public final TestItemTree ITEM_TREE = new TestItemTree();
+//    public final TestItemTree ITEM_TREE = new TestItemTree();
     private final MemoizingSupplier<Launch> launch;
     private volatile Thread shutDownHook;
 
@@ -47,18 +49,14 @@ public class ReportPortalServer {
             Launch newLaunch = reportPortal.newLaunch(startRq);
             shutDownHook = getShutdownHook(() -> newLaunch);
             Runtime.getRuntime().addShutdownHook(shutDownHook);
-
             CURRENT_ReportPortalServer.set(this);
+
             return newLaunch;
         });
     }
 
 
 
-    public void startLaunch() {
-        Maybe<String> launchId = launch.get().start();
-        ITEM_TREE.setLaunchId(launchId);
-    }
 
     public void finishLaunch() {
         FinishExecutionRQ rq = new FinishExecutionRQ();
@@ -69,51 +67,44 @@ public class ReportPortalServer {
         Runtime.getRuntime().removeShutdownHook(shutDownHook);
     }
 
-    private void addToTree(String key, Maybe<String> item) {
-        ITEM_TREE.getTestItems().put(createKey(key), TestItemTree.createTestItemLeaf(item));
-    }
-
-    private void addToTree(String key, Maybe<String> item, Maybe<String> parentItem) {
-        ITEM_TREE.getTestItems().put(createKey(key), TestItemTree.createTestItemLeaf(parentItem, item));
-    }
 
 
-    public Maybe<String> startTestSuite(String suiteName, String suiteDesc, String suitKey) {
+    public Maybe<String> startTestSuite(String suiteName, String suiteDesc) {
+        launch.get().start();
         StartTestItemRQ rq = buildStartItemRq(suiteName, suiteDesc, ItemType.SUITE);
         Launch myLaunch = launch.get();
         final Maybe<String> item = myLaunch.startTestItem(rq);
-        addToTree(suitKey, item, ITEM_TREE.getLaunchId());
         return item;
     }
 
 
-    public void finishTestSuite(ItemStatus status, String suitKey) {
-        TestItemTree.TestItemLeaf testItemLeaf = ITEM_TREE.getTestItems().get(createKey(suitKey));
-        Maybe<String> rpId = testItemLeaf.getItemId();
+    public void finishTestSuite(ItemStatus status) {
+        Maybe<String> rpId = launch.get().getStepReporter().getParent();
         Launch myLaunch = launch.get();
         if (null != rpId) {
             FinishTestItemRQ rq = buildFinishTestSuiteRq(status);
             myLaunch.finishTestItem(rpId, rq);
+        }else {
+
+            log.warn("rpId等于空");
+
         }
-        removeFromTree(suitKey);
     }
 
 
-    public Maybe<String> startTest(String testName, String testDesc, String testKey, String parentKey) {
-        TestItemTree.TestItemLeaf prentLeaf = ITEM_TREE.getTestItems().get(createKey(parentKey));
+    public Maybe<String> startTest(String testName, String testDesc) {
+        Maybe<String> rpId = launch.get().getStepReporter().getParent();
         StartTestItemRQ rq = buildStartItemRq(testName, testDesc, ItemType.TEST);
         Launch myLaunch = launch.get();
-        final Maybe<String> testID = myLaunch.startTestItem(prentLeaf.getItemId(), rq);
-        addToTree(testKey, testID, prentLeaf.getItemId());
+        final Maybe<String> testID = myLaunch.startTestItem(rpId, rq);
         return testID;
     }
 
 
-    public void finishTest(ItemStatus testContext, String testKey) {
-        TestItemTree.TestItemLeaf testItemLeaf = ITEM_TREE.getTestItems().get(createKey(testKey));
+    public void finishTest(ItemStatus testContext ) {
+        Maybe<String> rpId = launch.get().getStepReporter().getParent();
         FinishTestItemRQ rq = buildFinishTestRq(testContext);
-        launch.get().finishTestItem(testItemLeaf.getItemId(), rq);
-        removeFromTree(testKey);
+        launch.get().finishTestItem(rpId, rq);
     }
 
 
@@ -184,9 +175,6 @@ public class ReportPortalServer {
         });
     }
 
-    private void removeFromTree(String itemesKey) {
-        ITEM_TREE.getTestItems().remove(createKey(itemesKey));
-    }
 
 
 }

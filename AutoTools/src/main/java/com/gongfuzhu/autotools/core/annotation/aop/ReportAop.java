@@ -48,9 +48,8 @@ public class ReportAop {
         log.info("方法名称{}", method);
 
         ReportPortalServer reportPortalServer = new ReportPortalServer(reportPortal);
-        reportPortalServer.startLaunch();
 
-        reportPortalServer.startTestSuite("测试测试", "这里是描述",key);
+        reportPortalServer.startTestSuite("xx模块", "这里是描述");
 
 
         Object[] args = pjp.getArgs();
@@ -60,16 +59,15 @@ public class ReportAop {
 
         try {
             proceed = pjp.proceed(args);
+            reportPortalServer.finishTestSuite(ItemStatus.PASSED);
         } catch (Throwable e) {
             e.printStackTrace();
             log.info(e.toString());
-            reportPortalServer.finishTestSuite(ItemStatus.FAILED, key);
+            reportPortalServer.finishTestSuite(ItemStatus.FAILED);
             return proceed;
         }finally {
             reportPortalServer.finishLaunch();
         }
-        log.info("方法被执行");
-        reportPortalServer.finishTestSuite(ItemStatus.PASSED, key);
 
 
         return proceed;

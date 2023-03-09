@@ -32,7 +32,7 @@ public class TestAop {
         ReportPortalServer reportPortalServer = ReportPortalServer.CURRENT_ReportPortalServer.get();
 
 
-        reportPortalServer.startTest(test.testName(), "名称描述", classKey, concat);
+        reportPortalServer.startTest(test.testName(), "名称描述");
 
 
         Object[] args = pjp.getArgs();
@@ -45,11 +45,11 @@ public class TestAop {
         } catch (Throwable e) {
             e.printStackTrace();
             log.info(e.toString());
-            reportPortalServer.finishTest(ItemStatus.FAILED, concat);
+            reportPortalServer.finishTest(ItemStatus.FAILED);
             return proceed;
         }
         log.info("测试通过");
-        reportPortalServer.finishTest(ItemStatus.PASSED, concat);
+        reportPortalServer.finishTest(ItemStatus.PASSED);
 
 
         return proceed;

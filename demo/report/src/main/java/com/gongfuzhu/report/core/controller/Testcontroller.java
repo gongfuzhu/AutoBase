@@ -18,21 +18,21 @@ public class Testcontroller {
 
     TestService testService;
     @RequestMapping("log1")
-    @Report(suitName = "测试日志上传附件",desc = "描述描述")
+    @Report(suitName = "测试日志上传附件",desc = "测试日志上传附件")
     public void log1(){
         log.info("测试日志上传附件");
         testService.logFile("这是参数",50);
 
     }
     @RequestMapping("log2")
-    @Report(suitName = "测试日志报异常",desc = "描述描述")
+    @Report(suitName = "测试日志报异常",desc = "测试日志报异常")
     public void log2(){
         log.info("测试日志报异常");
         testService.logException();
 
     }
     @RequestMapping("log3")
-    @Report(suitName = "测试断言",desc = "描述描述")
+    @Report(suitName = "测试断言",desc = "测试断言")
     public void log3(){
         log.info("测试断言");
         testService.logAssert();
@@ -41,7 +41,7 @@ public class Testcontroller {
 
     @RequestMapping("se")
     @SeleniumTest
-    @Report(suitName = "UI测试",desc = "描述描述")
+    @Report(suitName = "UI测试",desc = "UI测试")
     public void seleniumTest(){
         testService.seleniumTest();
     }

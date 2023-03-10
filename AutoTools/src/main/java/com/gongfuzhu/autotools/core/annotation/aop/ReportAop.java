@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -73,16 +74,27 @@ public class ReportAop {
     protected static StringBuilder info(ProceedingJoinPoint pjp, String desc) {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
+        Parameter[] parameters = method.getParameters();
+        Class<?>[] parameterTypes = method.getParameterTypes();
         Object[] args = pjp.getArgs();
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("class:").append(pjp.getTarget().getClass().getName() + "\n");
+        stringBuilder.append("class:").append(pjp.getTarget().getClass().getSimpleName() + "\n");
         stringBuilder.append("methodName:").append(method.getName() + "\n");
 
         if (!desc.isEmpty()) stringBuilder.append("desc:").append(desc + "\n");
 
-        if (args.length != 0) Arrays.stream(args).forEach(it -> {
-            stringBuilder.append(it);
-        });
+        if (args.length != 0) {
+            stringBuilder.append("parameters:\n");
+            for (int i = 0; i < parameters.length; i++) {
+                stringBuilder.append("- ").append(parameterTypes[i].getSimpleName()).append(":").append(parameters[i].getName()).append(":").append(args[i].toString()).append("\n");
+            }
+        }
+
+
+
+//        if (args.length != 0) Arrays.stream(args).forEach(it -> {
+//            stringBuilder.append(it);
+//        });
 
         return stringBuilder;
 

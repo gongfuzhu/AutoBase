@@ -3,7 +3,7 @@ package com.gongfuzhu.report.core.config;
 import com.epam.reportportal.aspect.StepAspect;
 import com.epam.reportportal.service.ReportPortal;
 import com.gongfuzhu.autotools.core.reportannotation.aop.ReportAop;
-import com.gongfuzhu.autotools.core.reportannotation.aop.SeleniumTestAop;
+import com.gongfuzhu.autotools.core.reportannotation.aop.SeleniumDriverAop;
 import com.gongfuzhu.autotools.core.reportannotation.aop.TestAop;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Log4j2
-@Import({ReportAop.class, StepAspect.class, TestAop.class, SeleniumTestAop.class})
+@Import({ReportAop.class, StepAspect.class, TestAop.class, SeleniumDriverAop.class})
 @Configuration
 public class ReportConfig {
 

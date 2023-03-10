@@ -2,6 +2,7 @@ package com.gongfuzhu.autotools.core.reportannotation.aop;
 
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
+import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.gongfuzhu.autotools.core.reportannotation.Report;
@@ -12,17 +13,22 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.UUID;
 
 @Component
 @Aspect
 @Log4j2
+@Import(ReportPortalServer.class)
 public class ReportAop {
 
 
+    @Autowired
+    ReportPortalServer reportPortalServer;
     @Autowired
     ReportPortal reportPortal;
 
@@ -37,7 +43,8 @@ public class ReportAop {
         String suitName = report.suitName().isEmpty() ? signature.getName() : report.suitName();
 
 
-        ReportPortalServer reportPortalServer = new ReportPortalServer(reportPortal, report.desc());
+
+        reportPortalServer.initReport(reportPortal,report.desc());
         reportPortalServer.startLaunch();
 
         StartTestItemRQ testSuit = reportPortalServer.buildStartItemRq(suitName, ItemType.SUITE);
@@ -55,13 +62,12 @@ public class ReportAop {
         try {
             proceed = pjp.proceed(args);
             reportPortalServer.finishTestSuite(ItemStatus.PASSED);
+            reportPortalServer.finishLaunch(ItemStatus.PASSED);
         } catch (Throwable e) {
             e.printStackTrace();
-            log.info(e.toString());
             reportPortalServer.finishTestSuite(ItemStatus.FAILED);
+            reportPortalServer.finishLaunch(ItemStatus.FAILED);
             return proceed;
-        } finally {
-            reportPortalServer.finishLaunch();
         }
 
 
@@ -88,5 +94,7 @@ public class ReportAop {
         return stringBuilder;
 
     }
+
+
 
 }

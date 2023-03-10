@@ -10,14 +10,9 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-public @interface SeleniumTest {
+public @interface SeleniumDriver {
 
 
-    /**
-     * 是否需要driver
-     * @return
-     */
-    boolean isDriver() default true;
 
     /**
      * driver 类型
@@ -38,15 +33,14 @@ public @interface SeleniumTest {
     boolean report() default false;
 
 
-    ChromeOption option() default ChromeOption.notUserInfo;
+    ChromeOption option() default ChromeOption.Chrome_NotUserInfoDriver;
 
 
     enum ChromeOption {
-
-
-        notUserInfo(ChromeGeneralOptions.getCapabilities()),
-        userInfod(ChromeGeneralOptions.getUserCapabilities()),
-        H5(ChromeGeneralOptions.getUserCapabilities());
+        Chrome_NotUserInfoDriver(ChromeGeneralOptions.getCapabilities()),
+        Chrome_UserInfodDriver(ChromeGeneralOptions.getUserCapabilities()),
+        Chrome_H5Driver(ChromeGeneralOptions.getH5Capabilities()),
+        Chrome_CacheDriver(ChromeGeneralOptions.getCacheCapabilities());
         private ChromeOptions abstractDriverOptions;
 
 

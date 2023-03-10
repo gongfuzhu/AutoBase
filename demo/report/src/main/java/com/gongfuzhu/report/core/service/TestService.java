@@ -1,7 +1,7 @@
 package com.gongfuzhu.report.core.service;
 
 import com.gongfuzhu.autotools.core.reportannotation.Test;
-import com.gongfuzhu.autotools.core.selenium.InitiWebDriver;
+import com.gongfuzhu.autotools.core.selenium.WebDriverServer;
 import com.gongfuzhu.report.core.step.SendLog;
 import lombok.extern.log4j.Log4j2;
 import org.openqa.selenium.By;
@@ -19,7 +19,7 @@ public class TestService {
 
 
     @Autowired
-    InitiWebDriver initiWebDriver;
+    WebDriverServer initiWebDriver;
     @Autowired
     SendLog testSetp;
 
@@ -54,9 +54,8 @@ public class TestService {
 
 
     @Test
-    public void seleniumTest(){
+    public void seleniumTest(WebDriver driver ){
 
-        WebDriver driver = initiWebDriver.getDriver();
         driver.get("https://www.baidu.com");
         // 获取搜索框元素
         WebElement searchBox = driver.findElement(By.name("wd"));
@@ -73,9 +72,9 @@ public class TestService {
         driver.getWindowHandle();
 
 
-        driver.findElement(By.name("ssss"));
+//        driver.findElement(By.name("ssss"));
 
-        System.out.println("????????????????????????????????????????");
+        log.info("执行完毕，{}",System.currentTimeMillis());
 
     }
 

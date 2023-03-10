@@ -2,9 +2,6 @@ package com.gongfuzhu.autotools.core.selenium;
 
 import com.epam.reportportal.service.ReportPortal;
 import com.gongfuzhu.autotools.core.selenium.util.WebDriverUtil;
-import com.google.common.io.Resources;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.openqa.selenium.*;
@@ -23,11 +20,7 @@ import java.util.*;
 
 @Log4j2
 public class MyWebDriverListener implements WebDriverListener {
-    private WebDriver wb;
 
-    public MyWebDriverListener(WebDriver wb) {
-        this.wb = wb;
-    }
 
     // 全局设置
     @Override
@@ -185,7 +178,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterPerform(WebDriver driver, Collection<Sequence> actions) {
-        infoSc(wb,"afterPerform");
+        infoSc(WebDriverServer.getCURRENT_TaskMode().get().getWebDriver(), "afterPerform");
     }
 
     @Override
@@ -215,7 +208,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterClick(WebElement element) {
-        infoSc(wb, "afterClick");
+        infoSc(WebDriverServer.getCURRENT_TaskMode().get().getWebDriver(), "afterClick");
     }
 
     @Override
@@ -225,7 +218,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterSubmit(WebElement element) {
-        infoSc(wb, "afterSubmit");
+        infoSc(WebDriverServer.getCURRENT_TaskMode().get().getWebDriver(), "afterSubmit");
     }
 
     @Override
@@ -239,7 +232,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterSendKeys(WebElement element, CharSequence... keysToSend) {
-        infoSc(wb, "afterSendKeys");
+        infoSc(WebDriverServer.getCURRENT_TaskMode().get().getWebDriver(), "afterSendKeys");
 
     }
 
@@ -250,7 +243,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterClear(WebElement element) {
-        infoSc(wb, "afterClear");
+        infoSc(WebDriverServer.getCURRENT_TaskMode().get().getWebDriver(), "afterClear");
     }
 
     @Override

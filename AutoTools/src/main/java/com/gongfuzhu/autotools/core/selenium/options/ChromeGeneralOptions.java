@@ -16,13 +16,7 @@ public class ChromeGeneralOptions {
     public static ChromeOptions getCapabilities(){
 
         ChromeOptions chromeOptions = new ChromeOptions();
-
-
-        //加载用户信息
-        chromeOptions.addArguments( ChromeArguments.disableBlinkFeatures, ChromeArguments.automationControlled);
-        //禁止弹窗提示
-        chromeOptions.setExperimentalOption("excludeSwitches",new String[]{"enable-automation"});
-        chromeOptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+        generaSet(chromeOptions);
 
         return chromeOptions;
 
@@ -37,12 +31,17 @@ public class ChromeGeneralOptions {
 
         ChromeOptions chromeOptions = new ChromeOptions();
 
+        chromeOptions.addArguments(ChromeArguments.userDataDir);
+        generaSet(chromeOptions);
 
+        return chromeOptions;
 
-        chromeOptions.addArguments(ChromeArguments.userDataDir, ChromeArguments.disableBlinkFeatures, ChromeArguments.automationControlled);
-        //禁止弹窗提示
-        chromeOptions.setExperimentalOption("excludeSwitches",new String[]{"enable-automation"});
-        chromeOptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+    }
+
+    public static ChromeOptions getCacheCapabilities(){
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments(ChromeArguments.tempDataDir);
+        generaSet(chromeOptions);
 
         return chromeOptions;
 
@@ -56,12 +55,19 @@ public class ChromeGeneralOptions {
         HashMap<String, String> mobileEmulation  = new HashMap<>();
         String deviceName = "Galaxy S5";	//iPhone X/Galaxy S5
         mobileEmulation.put("deviceName",deviceName);
-
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.setExperimentalOption("mobileEmulation",mobileEmulation);
         chromeOptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
         return chromeOptions;
+
+    }
+
+    private static void generaSet(ChromeOptions chromeOptions){
+        chromeOptions.addArguments( ChromeArguments.disableBlinkFeatures, ChromeArguments.automationControlled);
+        //禁止弹窗提示
+        chromeOptions.setExperimentalOption("excludeSwitches",new String[]{"enable-automation"});
+        chromeOptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
     }
 

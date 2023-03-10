@@ -1,13 +1,11 @@
 package com.gongfuzhu.autotools.core.selenium;
 
-import com.gongfuzhu.autotools.core.selenium.mode.TaskMode;
 import com.gongfuzhu.autotools.core.selenium.options.ChromeGeneralOptions;
 import com.gongfuzhu.autotools.core.tools.SystemTool;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.bonigarcia.wdm.config.DriverManagerType;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.log4j.Log4j2;
-import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.events.EventFiringDecorator;
@@ -16,21 +14,20 @@ import java.io.File;
 import java.time.Duration;
 
 @Log4j2
-public class InitiWebDriver {
+public class WebDriverServer {
 
 
     private String catchPath = "/tmp/catch";
 
 
-    private ThreadLocal<TaskMode> taskMode = ThreadLocal.withInitial(() -> null);
-    private ThreadLocal<Capabilities> capabilities = ThreadLocal.withInitial(() -> null);
+    private static @Getter ThreadLocal<driverMode> CURRENT_TaskMode = ThreadLocal.withInitial(() -> null);
 
 
     public WebDriver getDriver() {
-        if (null == taskMode.get().getWebDriver()) {
+        if (null == CURRENT_TaskMode.get().getWebDriver()) {
             localDriver(DriverManagerType.CHROME, ChromeGeneralOptions.getCapabilities());
         }
-        return taskMode.get().getWebDriver();
+        return CURRENT_TaskMode.get().getWebDriver();
     }
 
 
@@ -42,23 +39,23 @@ public class InitiWebDriver {
      */
 
     public WebDriver localDriver(DriverManagerType type, ChromeOptions capabilities) {
-        if (null == taskMode.get()) {
+        if (null == CURRENT_TaskMode.get()) {
             WebDriver webDriver;
             if (SystemTool.isWindos()) {
 
                 WebDriverManager wd = WebDriverManager.getInstance(type).capabilities(capabilities);
                 webDriver = wd.create();
-                this.taskMode.set(new TaskMode(webDriver, wd));
+                this.CURRENT_TaskMode.set(new driverMode(webDriver, wd));
             } else {
                 dockerDriver(type, capabilities);
             }
 
         } else {
-            return taskMode.get().getWebDriver();
+            return CURRENT_TaskMode.get().getWebDriver();
 
         }
         startLinsen();
-        return generalSettings(taskMode.get().getWebDriver());
+        return generalSettings(CURRENT_TaskMode.get().getWebDriver());
     }
 
     /**
@@ -68,7 +65,7 @@ public class InitiWebDriver {
      * @return
      */
 
-    public WebDriver dockerDriver(DriverManagerType type, ChromeOptions capabilities) {
+    private WebDriver dockerDriver(DriverManagerType type, ChromeOptions capabilities) {
 
 
         WebDriver webDriver;
@@ -79,7 +76,7 @@ public class InitiWebDriver {
         wd.dockerScreenResolution("1920x1080x24").enableRecording().enableVnc();
         wd.dockerRecordingOutput(catchPath + File.separator + "video" + File.separator + System.currentTimeMillis() + ".mp4");
         webDriver = wd.create();
-        this.taskMode.set(new TaskMode(webDriver, wd));
+        this.CURRENT_TaskMode.set(new driverMode(webDriver, wd));
         return generalSettings(webDriver);
 
     }
@@ -89,10 +86,10 @@ public class InitiWebDriver {
     public void closeDriver() {
         //等待录制功能结束
         Thread.sleep(5000);
-        TaskMode taskMode = this.taskMode.get();
+        driverMode taskMode = this.CURRENT_TaskMode.get();
         taskMode.getWebDriver().quit();
         taskMode.getWebDriverManager().quit();
-        this.taskMode.remove();
+        this.CURRENT_TaskMode.remove();
 
 
     }
@@ -114,15 +111,25 @@ public class InitiWebDriver {
     private void startLinsen() {
         //等待录制功能启动
         Thread.sleep(5000);
-        WebDriver driver = getDriver();
-        MyWebDriverListener myWebDriverListener = new MyWebDriverListener(driver);
+        driverMode tm = CURRENT_TaskMode.get();
+        WebDriver webDriver = tm.getWebDriver();
+        MyWebDriverListener myWebDriverListener = new MyWebDriverListener();
 
         EventFiringDecorator eventFiringDecorator = new EventFiringDecorator(myWebDriverListener);
-        WebDriver decorate = eventFiringDecorator.decorate(driver);
-        TaskMode taskMode1 = taskMode.get();
-        taskMode1.setWebDriver(decorate);
+        WebDriver decorate = eventFiringDecorator.decorate(webDriver);
+        tm.setWebDriver(decorate);
 
 
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class driverMode {
+
+        private WebDriver webDriver;
+
+        private WebDriverManager webDriverManager;
     }
 
 

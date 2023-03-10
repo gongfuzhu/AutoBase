@@ -1,9 +1,10 @@
 package com.gongfuzhu.report.core.controller;
 
 import com.gongfuzhu.autotools.core.reportannotation.Report;
-import com.gongfuzhu.autotools.core.reportannotation.SeleniumTest;
+import com.gongfuzhu.autotools.core.reportannotation.SeleniumDriver;
 import com.gongfuzhu.report.core.service.TestService;
 import lombok.extern.log4j.Log4j2;
+import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,9 +41,9 @@ public class Testcontroller {
     }
 
     @RequestMapping("se")
-    @SeleniumTest
+    @SeleniumDriver
     @Report(suitName = "UI测试",desc = "UI测试")
-    public void seleniumTest(){
-        testService.seleniumTest();
+    public void seleniumTest(WebDriver webDriver){
+        testService.seleniumTest(webDriver);
     }
 }

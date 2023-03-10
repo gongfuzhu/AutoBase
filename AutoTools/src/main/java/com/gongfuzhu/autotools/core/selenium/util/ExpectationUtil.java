@@ -25,13 +25,15 @@ public class ExpectationUtil {
 
 
         return driver -> {
+            log.info("等待元素消失");
             Duration implicitWaitTimeout = driver.manage().timeouts().getImplicitWaitTimeout();
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
             try {
                 WebElement elements = driver.findElement(by);
-                log.info("提示：{}", elements.getText());
+                log.info("元素存在?：{}_{}",true, elements.getText());
                 return false;
             } catch (Exception e) {
+                log.info("元素存在?:{}",false);
                 return true;
             } finally {
                 driver.manage().timeouts().implicitlyWait(implicitWaitTimeout);

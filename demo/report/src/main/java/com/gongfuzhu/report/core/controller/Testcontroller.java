@@ -17,19 +17,32 @@ public class Testcontroller {
     @Autowired
 
     TestService testService;
-    @RequestMapping("log")
-    @Report(suitName = "登录模块",desc = "这还是描述")
-    public void test(){
-        log.info("这是日志1");
-        testService.test01("这是参数",50);
+    @RequestMapping("log1")
+    @Report(suitName = "测试日志上传附件",desc = "描述描述")
+    public void log1(){
+        log.info("测试日志上传附件");
+        testService.logFile("这是参数",50);
+
+    }
+    @RequestMapping("log2")
+    @Report(suitName = "测试日志报异常",desc = "描述描述")
+    public void log2(){
+        log.info("测试日志报异常");
+        testService.logException();
+
+    }
+    @RequestMapping("log3")
+    @Report(suitName = "测试断言",desc = "描述描述")
+    public void log3(){
+        log.info("测试断言");
+        testService.logAssert();
 
     }
 
     @RequestMapping("se")
     @SeleniumTest
-    @Report(suitName = "UI测试",desc = "这还是描述")
+    @Report(suitName = "UI测试",desc = "描述描述")
     public void seleniumTest(){
-
         testService.seleniumTest();
     }
 }

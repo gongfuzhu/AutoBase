@@ -43,6 +43,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void onError(Object target, Method method, Object[] args, InvocationTargetException e) {
+        log.fatal("webDriver exception:{}",e.getTargetException().getMessage());
     }
 
     // WebDriver
@@ -132,11 +133,11 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void beforeQuit(WebDriver driver) {
-        log.info("关闭程序");
     }
 
     @Override
     public void afterQuit(WebDriver driver) {
+        log.info("afterQuit");
     }
 
     @Override

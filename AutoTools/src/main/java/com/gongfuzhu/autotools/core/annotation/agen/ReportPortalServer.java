@@ -19,6 +19,7 @@ import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
 import io.reactivex.internal.operators.maybe.MaybeCache;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Import;
 
@@ -35,16 +36,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Log4j2
 public class ReportPortalServer {
 
-    public static final ThreadLocal<ReportPortalServer> CURRENT_ReportPortalServer = new InheritableThreadLocal<>();
-    private final MemoizingSupplier<Launch> launch;
+    private static final @Getter ThreadLocal<ReportPortalServer> CURRENT_ReportPortalServer = new InheritableThreadLocal<>();
+    private final @Getter MemoizingSupplier<Launch> launch;
     private volatile Thread shutDownHook;
+    private final @Setter AtomicBoolean isLaunchFailed = new AtomicBoolean();
 
-    private final AtomicBoolean isLaunchFailed = new AtomicBoolean();
-
-    public ReportPortalServer(@Nonnull final ReportPortal reportPortal) {
+    public ReportPortalServer(@Nonnull final ReportPortal reportPortal,String desc) {
         this.launch = new MemoizingSupplier<>(() -> {
             StartLaunchRQ startRq = buildStartLaunchRq(reportPortal.getParameters());
             startRq.setStartTime(Calendar.getInstance().getTime());
+            Optional.of(desc).ifPresent(it->{startRq.setDescription(desc);
+            });
             Launch newLaunch = reportPortal.newLaunch(startRq);
             shutDownHook = getShutdownHook(() -> newLaunch);
             Runtime.getRuntime().addShutdownHook(shutDownHook);
@@ -66,11 +68,14 @@ public class ReportPortalServer {
         Runtime.getRuntime().removeShutdownHook(shutDownHook);
     }
 
+    public Maybe<String> startLaunch(){
+        return launch.get().start();
+    }
 
 
     public Maybe<String> startTestSuite(String suiteName, String suiteDesc) {
-        launch.get().start();
-        StartTestItemRQ rq = buildStartItemRq(suiteName, suiteDesc, ItemType.SUITE);
+        StartTestItemRQ rq = buildStartItemRq(suiteName, ItemType.SUITE);
+        rq.setDescription(suiteDesc);
         Launch myLaunch = launch.get();
         final Maybe<String> item = myLaunch.startTestItem(rq);
         return item;
@@ -93,7 +98,8 @@ public class ReportPortalServer {
 
     public Maybe<String> startTest(String testName, String testDesc,Set<ItemAttributesRQ> attributes) {
         Maybe<String> rpId = launch.get().getStepReporter().getParent();
-        StartTestItemRQ rq = buildStartItemRq(testName, testDesc, ItemType.TEST);
+        StartTestItemRQ rq = buildStartItemRq(testName, ItemType.TEST);
+        rq.setDescription(testDesc);
         rq.setAttributes(attributes);
         Launch myLaunch = launch.get();
         final Maybe<String> testID = myLaunch.startTestItem(rpId, rq);
@@ -151,12 +157,11 @@ public class ReportPortalServer {
         return rq;
     }
 
-    protected StartTestItemRQ buildStartItemRq(String itemName, String desc, ItemType itemType) {
+    protected StartTestItemRQ buildStartItemRq(String itemName, ItemType itemType) {
         StartTestItemRQ rq = new StartTestItemRQ();
         rq.setName(itemName);
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType(itemType.name());
-        rq.setDescription(desc);
         return rq;
     }
 

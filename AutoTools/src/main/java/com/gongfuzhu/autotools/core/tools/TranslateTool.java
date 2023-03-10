@@ -86,7 +86,6 @@ public class TranslateTool {
         CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
         try {
             Header[] contentType = httpResponse.getHeaders("Content-Type");
-            log.info("Content-Type:" + contentType[0].getValue());
             if ("audio/mp3".equals(contentType[0].getValue())) {
                 //如果响应是wav
                 HttpEntity httpEntity = httpResponse.getEntity();
@@ -104,9 +103,9 @@ public class TranslateTool {
                 HttpEntity httpEntity = httpResponse.getEntity();
                 String json = EntityUtils.toString(httpEntity, "UTF-8");
                 EntityUtils.consume(httpEntity);
-                log.info(json);
+                log.info("文本翻译："+json);
 
-                DocumentContext parse = JsonPath.parse(json);
+//                DocumentContext parse = JsonPath.parse(json);
                 Object translation1 = JsonPath.read(json, "translation[0]");
 
                 return String.valueOf(translation1);

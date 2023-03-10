@@ -37,20 +37,17 @@ public class TestAop {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
 
-        Object[] args1 = pjp.getArgs();
-        Parameter[] parameters = method.getParameters();
 
 
         String name = method.getName();
         String testName = test.testName().isEmpty() ? name : test.testName();
         String desc = test.desc();
 
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("方法名:").append(method.getName()).append(";");
-//        Json json = new Json();
-//        String desc = json.toJson();
-        ReportPortalServer reportPortalServer = ReportPortalServer.CURRENT_ReportPortalServer.get();
-        reportPortalServer.startTest(testName, desc, Collections.unmodifiableSet(AttributeParser.parseAsSet(stringBuilder.toString())));
+        ReportPortalServer reportPortalServer = ReportPortalServer.getCURRENT_ReportPortalServer().get();
+        StringBuilder info = ReportAop.info(pjp, desc);
+
+
+        reportPortalServer.startTest(testName, info.toString(),null);
 
         Object[] args = pjp.getArgs();
 

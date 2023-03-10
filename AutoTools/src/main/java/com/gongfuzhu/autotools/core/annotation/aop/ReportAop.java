@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @Component
 @Aspect
@@ -34,18 +37,15 @@ public class ReportAop {
     public Object doAround(ProceedingJoinPoint pjp, Report report) {
 
         MethodSignature signature = (MethodSignature) pjp.getSignature();
-        Method method = signature.getMethod();
         String suitName = report.suitName().isEmpty() ? signature.getName() : report.suitName();
 
+        StringBuilder info = info(pjp, report.desc());
 
-        Object[] args1 = pjp.getArgs();
-        String desc = report.desc();
-        Map<String, Object> keyValue = Map.of("描述", desc, "方法", method.getName(), "参数", args1);
-        Json json = new Json();
+        ReportPortalServer reportPortalServer = new ReportPortalServer(reportPortal, report.desc());
+        reportPortalServer.startLaunch();
 
 
-        ReportPortalServer reportPortalServer = new ReportPortalServer(reportPortal);
-        reportPortalServer.startTestSuite(suitName, json.toJson(keyValue));
+        reportPortalServer.startTestSuite(suitName, info.toString());
 
 
         Object[] args = pjp.getArgs();
@@ -67,6 +67,24 @@ public class ReportAop {
 
 
         return proceed;
+
+    }
+
+    protected static StringBuilder info(ProceedingJoinPoint pjp, String desc) {
+        MethodSignature signature = (MethodSignature) pjp.getSignature();
+        Method method = signature.getMethod();
+        Object[] args = pjp.getArgs();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("class:").append(pjp.getTarget().getClass().getName() + "\n");
+        stringBuilder.append("methodName:").append(method.getName() + "\n");
+
+        if (!desc.isEmpty()) stringBuilder.append("desc:").append(desc + "\n");
+
+        if (args.length != 0) Arrays.stream(args).forEach(it -> {
+            stringBuilder.append(it);
+        });
+
+        return stringBuilder;
 
     }
 

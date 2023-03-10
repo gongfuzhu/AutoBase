@@ -1,10 +1,7 @@
 package com.gongfuzhu.report.core.service;
 
-import com.epam.reportportal.service.ReportPortal;
 import com.gongfuzhu.autotools.core.annotation.Test;
 import com.gongfuzhu.autotools.core.selenium.InitiWebDriver;
-import com.gongfuzhu.autotools.core.selenium.util.WebDriverUtil;
-import com.gongfuzhu.autotools.core.tools.LoggingTools;
 import com.gongfuzhu.report.core.step.SendLog;
 import lombok.extern.log4j.Log4j2;
 import org.openqa.selenium.By;
@@ -12,8 +9,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
-import java.io.File;
 import java.util.Date;
 
 
@@ -30,7 +27,7 @@ public class TestService {
 
 
     @Test(testName = "上传测试附件测试")
-    public void test01(String aaa,int ddd){
+    public void logFile(String aaa, int ddd){
 
         log.info("上传图片，时间：{}",new Date());
         testSetp.jpg();
@@ -38,9 +35,22 @@ public class TestService {
         testSetp.css();
         log.info("上传zip");
         testSetp.zip();
+
+
+
+    }
+
+    @Test(testName = "异常信息")
+    public void logException(){
         log.warn("异常信息");
         testSetp.exception();
 
+    }
+
+    @Test(testName = "断言测试")
+    public void logAssert(){
+        log.warn("断言");
+        testSetp.assertTest();
     }
 
 
@@ -63,6 +73,10 @@ public class TestService {
         driver.getWindowHandles();
         driver.getWindowHandle();
 
+
+        driver.findElement(By.name("ssss"));
+
+        System.out.println("????????????????????????????????????????");
 
     }
 

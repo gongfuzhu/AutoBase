@@ -88,7 +88,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void beforeFindElement(WebDriver driver, By locator) {
-        log.info("查找元素：{}", locator.toString());
+        log.info("beforeFindElement：{}", locator.toString());
     }
 
     @Override
@@ -234,7 +234,7 @@ public class MyWebDriverListener implements WebDriverListener {
         Arrays.stream(keysToSend).forEach(it->{
             stringBuilder.append(it);
         });
-        infoSc(element.getScreenshotAs(OutputType.FILE), "输入：" + stringBuilder);
+        infoSc(element.getScreenshotAs(OutputType.FILE), "sendKeys：" + stringBuilder);
     }
 
     @Override
@@ -295,7 +295,7 @@ public class MyWebDriverListener implements WebDriverListener {
 
     @Override
     public void afterGetText(WebElement element, String result) {
-        log.info("获取文本：{}", result);
+        log.info("getText：{}", result);
     }
 
     @Override
@@ -592,12 +592,12 @@ public class MyWebDriverListener implements WebDriverListener {
     private void infoSc(WebDriver webDriver, String message) {
 
         File screenshot = WebDriverUtil.screenshot(webDriver);
-        ReportPortal.emitLog(message, "info", new Date(), screenshot);
+        ReportPortal.emitLog(message+" screenShot", "info", new Date(), screenshot);
     }
 
     private void infoSc(File file, String message) {
 
-        ReportPortal.emitLog(message, "info", new Date(), file);
+        ReportPortal.emitLog(message+" screenShot", "info", new Date(), file);
     }
 
 

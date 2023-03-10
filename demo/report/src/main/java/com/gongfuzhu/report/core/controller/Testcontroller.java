@@ -1,7 +1,7 @@
 package com.gongfuzhu.report.core.controller;
 
-import com.gongfuzhu.autotools.core.annotation.Report;
-import com.gongfuzhu.autotools.core.annotation.SeleniumTest;
+import com.gongfuzhu.autotools.core.reportannotation.Report;
+import com.gongfuzhu.autotools.core.reportannotation.SeleniumTest;
 import com.gongfuzhu.report.core.service.TestService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;

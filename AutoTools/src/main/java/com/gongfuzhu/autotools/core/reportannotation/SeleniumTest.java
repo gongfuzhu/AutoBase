@@ -1,4 +1,4 @@
-package com.gongfuzhu.autotools.core.annotation;
+package com.gongfuzhu.autotools.core.reportannotation;
 
 import com.gongfuzhu.autotools.core.selenium.options.ChromeGeneralOptions;
 import io.github.bonigarcia.wdm.config.DriverManagerType;

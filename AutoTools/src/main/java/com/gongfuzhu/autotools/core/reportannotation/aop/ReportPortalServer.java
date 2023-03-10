@@ -1,6 +1,5 @@
-package com.gongfuzhu.autotools.core.annotation.agen;
+package com.gongfuzhu.autotools.core.reportannotation.aop;
 
-import com.epam.reportportal.aspect.StepAspect;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.listeners.ListenerParameters;
@@ -14,23 +13,18 @@ import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
-import com.epam.ta.reportportal.ws.model.launch.Mode;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
-import io.reactivex.internal.operators.maybe.MaybeCache;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.context.annotation.Import;
 
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import static com.gongfuzhu.autotools.core.annotation.agen.ItemTreeUtils.createKey;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Log4j2
@@ -96,13 +90,10 @@ public class ReportPortalServer {
     }
 
 
-    public Maybe<String> startTest(String testName, String testDesc,Set<ItemAttributesRQ> attributes) {
-        Maybe<String> rpId = launch.get().getStepReporter().getParent();
-        StartTestItemRQ rq = buildStartItemRq(testName, ItemType.TEST);
-        rq.setDescription(testDesc);
-        rq.setAttributes(attributes);
+    public Maybe<String> startTest(StartTestItemRQ testItemRQ) {
         Launch myLaunch = launch.get();
-        final Maybe<String> testID = myLaunch.startTestItem(rpId, rq);
+        Maybe<String> rpId = myLaunch.getStepReporter().getParent();
+        final Maybe<String> testID = myLaunch.startTestItem(rpId, testItemRQ);
         return testID;
     }
 
@@ -159,6 +150,7 @@ public class ReportPortalServer {
 
     protected StartTestItemRQ buildStartItemRq(String itemName, ItemType itemType) {
         StartTestItemRQ rq = new StartTestItemRQ();
+        rq.setLaunchUuid(launch.get().getLaunch().blockingGet());
         rq.setName(itemName);
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType(itemType.name());

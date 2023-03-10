@@ -1,25 +1,21 @@
-package com.gongfuzhu.autotools.core.annotation.aop;
+package com.gongfuzhu.autotools.core.reportannotation.aop;
 
 import com.epam.reportportal.listeners.ItemStatus;
+import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
-import com.gongfuzhu.autotools.core.annotation.Report;
-import com.gongfuzhu.autotools.core.annotation.agen.ReportPortalServer;
+import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import com.gongfuzhu.autotools.core.reportannotation.Report;
 import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.openqa.selenium.json.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 @Component
 @Aspect
@@ -40,13 +36,15 @@ public class ReportAop {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         String suitName = report.suitName().isEmpty() ? signature.getName() : report.suitName();
 
-        StringBuilder info = info(pjp, report.desc());
 
         ReportPortalServer reportPortalServer = new ReportPortalServer(reportPortal, report.desc());
         reportPortalServer.startLaunch();
 
+        StartTestItemRQ testSuit = reportPortalServer.buildStartItemRq(suitName, ItemType.SUITE);
 
-        reportPortalServer.startTestSuite(suitName, info.toString());
+        testSuit.setDescription(report.desc());
+
+        reportPortalServer.startTestSuite(suitName, info(pjp).toString());
 
 
         Object[] args = pjp.getArgs();
@@ -71,18 +69,15 @@ public class ReportAop {
 
     }
 
-    protected static StringBuilder info(ProceedingJoinPoint pjp, String desc) {
+    private StringBuilder info(ProceedingJoinPoint pjp) {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
+        Object[] args = pjp.getArgs();
         Parameter[] parameters = method.getParameters();
         Class<?>[] parameterTypes = method.getParameterTypes();
-        Object[] args = pjp.getArgs();
+
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("class:").append(pjp.getTarget().getClass().getSimpleName() + "\n");
-        stringBuilder.append("methodName:").append(method.getName() + "\n");
-
-        if (!desc.isEmpty()) stringBuilder.append("desc:").append(desc + "\n");
-
+        stringBuilder.append("- ").append(pjp.getTarget().getClass().getName()).append(".").append(pjp.getSignature().getName()).append("\n");
         if (args.length != 0) {
             stringBuilder.append("parameters:\n");
             for (int i = 0; i < parameters.length; i++) {
@@ -90,15 +85,8 @@ public class ReportAop {
             }
         }
 
-
-
-//        if (args.length != 0) Arrays.stream(args).forEach(it -> {
-//            stringBuilder.append(it);
-//        });
-
         return stringBuilder;
 
     }
-
 
 }

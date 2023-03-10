@@ -1,4 +1,4 @@
-package com.gongfuzhu.autotools.core.annotation;
+package com.gongfuzhu.autotools.core.reportannotation;
 
 
 import java.lang.annotation.*;

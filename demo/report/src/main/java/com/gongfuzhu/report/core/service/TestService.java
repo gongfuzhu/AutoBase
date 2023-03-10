@@ -1,6 +1,6 @@
 package com.gongfuzhu.report.core.service;
 
-import com.gongfuzhu.autotools.core.annotation.Test;
+import com.gongfuzhu.autotools.core.reportannotation.Test;
 import com.gongfuzhu.autotools.core.selenium.InitiWebDriver;
 import com.gongfuzhu.report.core.step.SendLog;
 import lombok.extern.log4j.Log4j2;
@@ -9,7 +9,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.util.Date;
 
@@ -47,10 +46,10 @@ public class TestService {
 
     }
 
-    @Test(testName = "断言测试")
+    @Test(testName = "断言测试",desc = "这是断言描述")
     public void logAssert(){
         log.warn("断言");
-        testSetp.assertTest();
+        testSetp.assertFail();
     }
 
 

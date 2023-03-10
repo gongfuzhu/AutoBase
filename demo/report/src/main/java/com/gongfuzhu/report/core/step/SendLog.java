@@ -3,13 +3,13 @@ package com.gongfuzhu.report.core.step;
 import com.epam.reportportal.annotations.Step;
 import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.service.ReportPortal;
-import com.gongfuzhu.autotools.core.annotation.agen.ReportPortalServer;
+import com.gongfuzhu.autotools.core.reportannotation.aop.ReportPortalServer;
 import com.gongfuzhu.autotools.core.tools.LoggingTools;
 import com.google.common.io.Resources;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.junit.Assert;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.Date;
@@ -62,10 +62,11 @@ public class SendLog {
 
     }
 
-    @Step
-    public void assertTest(){
+    public void assertFail(){
         log.info("下面是true断言");
-        Assert.isTrue(false,"断言失败消息");
+        // 使用Junit 断言
+        Assert.fail();
+//        Assert.isTrue(false,"断言失败消息");
 
 
 

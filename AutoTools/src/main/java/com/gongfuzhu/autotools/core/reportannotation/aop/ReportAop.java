@@ -2,7 +2,6 @@ package com.gongfuzhu.autotools.core.reportannotation.aop;
 
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
-import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.gongfuzhu.autotools.core.reportannotation.Report;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.UUID;
 
 @Component
 @Aspect
@@ -37,14 +35,13 @@ public class ReportAop {
     }
 
     @Around("point(report)")
-    public Object doAround(ProceedingJoinPoint pjp, Report report) {
+    public Object doAround(ProceedingJoinPoint pjp, Report report) throws Throwable {
 
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         String suitName = report.suitName().isEmpty() ? signature.getName() : report.suitName();
 
 
-
-        reportPortalServer.initReport(reportPortal,report.desc());
+        reportPortalServer.initReport(reportPortal, report.desc());
         reportPortalServer.startLaunch();
 
         StartTestItemRQ testSuit = reportPortalServer.buildStartItemRq(suitName, ItemType.SUITE);
@@ -64,10 +61,10 @@ public class ReportAop {
             reportPortalServer.finishTestSuite(ItemStatus.PASSED);
             reportPortalServer.finishLaunch(ItemStatus.PASSED);
         } catch (Throwable e) {
-            e.printStackTrace();
+            log.fatal("exceptionR：",e);
             reportPortalServer.finishTestSuite(ItemStatus.FAILED);
             reportPortalServer.finishLaunch(ItemStatus.FAILED);
-            return proceed;
+            throw e;
         }
 
 
@@ -94,7 +91,6 @@ public class ReportAop {
         return stringBuilder;
 
     }
-
 
 
 }

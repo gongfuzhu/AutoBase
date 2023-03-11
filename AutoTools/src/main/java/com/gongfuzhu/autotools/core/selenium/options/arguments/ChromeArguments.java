@@ -1,6 +1,7 @@
 package com.gongfuzhu.autotools.core.selenium.options.arguments;
 
 import lombok.Data;
+import org.springframework.util.ClassUtils;
 
 import java.io.File;
 
@@ -12,7 +13,7 @@ public class ChromeArguments {
     public static String headless = "--headless";
     //数据存放位置
     public static String userDataDir = String.format("--user-data-dir=%s", System.getenv("LOCALAPPDATA") + File.separator + "Google\\Chrome\\User Data");
-    public static String tempDataDir = String.format("--user-data-dir=%s", System.getenv("LOCALAPPDATA") + File.separator + "Google\\Chrome\\tempData");
+    public static String tempDataDir = String.format("--user-data-dir=%s", System.getProperty ("user.dir")+ File.separator + "google");
     public static String disableInfobars = "disable-infobars";
     // 关闭自动化特征（可绕过网站机器人检测）
     public static String automationControlled = "--disable-blink-features=AutomationControlled";

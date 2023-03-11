@@ -12,6 +12,7 @@ import org.openqa.selenium.support.events.EventFiringDecorator;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.Optional;
 
 @Log4j2
 public class WebDriverServer {
@@ -24,9 +25,6 @@ public class WebDriverServer {
 
 
     public WebDriver getDriver() {
-        if (null == CURRENT_TaskMode.get().getWebDriver()) {
-            localDriver(DriverManagerType.CHROME, ChromeGeneralOptions.getCapabilities());
-        }
         return CURRENT_TaskMode.get().getWebDriver();
     }
 
@@ -87,8 +85,8 @@ public class WebDriverServer {
         //等待录制功能结束
         Thread.sleep(5000);
         driverMode taskMode = this.CURRENT_TaskMode.get();
-        taskMode.getWebDriver().quit();
-        taskMode.getWebDriverManager().quit();
+        Optional.ofNullable(taskMode.getWebDriver()).ifPresent(it->it.quit());
+        Optional.ofNullable(taskMode.getWebDriverManager()).ifPresent(it->it.quit());
         this.CURRENT_TaskMode.remove();
 
 

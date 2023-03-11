@@ -29,7 +29,7 @@ public class TestAop {
     }
 
     @Around("point(test)")
-    public Object doAround(ProceedingJoinPoint pjp, Test test) {
+    public Object doAround(ProceedingJoinPoint pjp, Test test) throws Throwable {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
 
@@ -60,13 +60,11 @@ public class TestAop {
         try {
             proceed = pjp.proceed(args);
         } catch (Throwable e) {
-            e.printStackTrace();
-            Optional.ofNullable(launch).ifPresent(it -> reportPortalServer.finishTest(ItemStatus.FAILED));
-
-            return proceed;
+            log.fatal("exceptionT：",e);
+            reportPortalServer.finishTest(ItemStatus.FAILED);
+            throw e;
         }
-        Optional.ofNullable(launch).ifPresent(it -> reportPortalServer.finishTest(ItemStatus.PASSED));
-
+        reportPortalServer.finishTest(ItemStatus.PASSED);
 
         return proceed;
 

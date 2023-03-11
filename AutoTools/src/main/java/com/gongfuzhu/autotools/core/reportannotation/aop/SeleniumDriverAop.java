@@ -27,7 +27,7 @@ public class SeleniumDriverAop {
     }
 
     @Around("point(seleniumTest)")
-    public Object doAround(ProceedingJoinPoint pjp, SeleniumDriver seleniumTest) {
+    public Object doAround(ProceedingJoinPoint pjp, SeleniumDriver seleniumTest) throws Throwable {
 
         WebDriverServer.driverMode driverMode = WebDriverServer.getCURRENT_TaskMode().get();
         final WebDriver webDriver;
@@ -57,7 +57,8 @@ public class SeleniumDriverAop {
             proceed = pjp.proceed(args);
         } catch (Throwable e) {
             e.printStackTrace();
-            return proceed;
+            log.fatal("seleniumException：",e);
+            throw e;
         } finally {
             webDriverServer.closeDriver();
         }

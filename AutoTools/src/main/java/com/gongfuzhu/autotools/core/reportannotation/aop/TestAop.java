@@ -21,8 +21,6 @@ import java.util.Optional;
 @Log4j2
 public class TestAop {
 
-    @Autowired
-    ReportPortalServer reportPortalServer;
 
     @Pointcut("@annotation(test)")
     public void point(Test test) {
@@ -38,6 +36,7 @@ public class TestAop {
         String testName = test.testName().isEmpty() ? name : test.testName();
         String desc = test.desc();
 
+        ReportPortalServer reportPortalServer = ReportPortalServer.currentLaunch();
         StringBuilder info = info(pjp, desc);
 
         // launch > suit > test > setp

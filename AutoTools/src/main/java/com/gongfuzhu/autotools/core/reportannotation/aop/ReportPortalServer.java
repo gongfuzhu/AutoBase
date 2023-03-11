@@ -16,13 +16,11 @@ import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -30,44 +28,64 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Log4j2
 public class ReportPortalServer {
 
+    private static final ThreadLocal<ReportPortalServer> CURRENT_ReportPortalServer = new InheritableThreadLocal<>();
 
-    public Launch initReport(@Nonnull final ReportPortal reportPortal,String desc) {
-
-        StartLaunchRQ startRq = buildStartLaunchRq(reportPortal.getParameters());
-        startRq.setStartTime(Calendar.getInstance().getTime());
-        Optional.of(desc).ifPresent(it->{startRq.setDescription(desc);
+    private final @Getter MemoizingSupplier<Launch> launch;
+    private volatile Thread shutDownHook;
+    private  Thread getShutdownHook(final Supplier<Launch> launch) {
+        return new Thread(() -> {
+            FinishExecutionRQ rq = new FinishExecutionRQ();
+            rq.setEndTime(Calendar.getInstance().getTime());
+            launch.get().finish(rq);
         });
-        return reportPortal.newLaunch(startRq);
+    }
 
+
+    public ReportPortalServer(@Nonnull final ReportPortal reportPortal) {
+        this.launch = new MemoizingSupplier<>(() -> {
+            StartLaunchRQ startRq = buildStartLaunchRq(reportPortal.getParameters());
+            startRq.setStartTime(Calendar.getInstance().getTime());
+            Launch newLaunch = reportPortal.newLaunch(startRq);
+            shutDownHook = getShutdownHook(() -> newLaunch);
+            Runtime.getRuntime().addShutdownHook(shutDownHook);
+            return newLaunch;
+        });
+        CURRENT_ReportPortalServer.set(this);
+    }
+
+
+    public static ReportPortalServer currentLaunch() {
+        return CURRENT_ReportPortalServer.get();
     }
 
 
 
+
+    public Maybe<String> startLaunch(){
+        return launch.get().start();
+    }
 
     public void finishLaunch(ItemStatus itemStatus) {
         FinishExecutionRQ rq = new FinishExecutionRQ();
         rq.setEndTime(Calendar.getInstance().getTime());
         rq.setStatus(itemStatus.name());
-        Launch.currentLaunch().finish(rq);
-    }
-
-    public Maybe<String> startLaunch(){
-        return Launch.currentLaunch().start();
+        launch.get().finish(rq);
+        Runtime.getRuntime().removeShutdownHook(shutDownHook);
     }
 
 
     public Maybe<String> startTestSuite(String suiteName, String suiteDesc) {
         StartTestItemRQ rq = buildStartItemRq(suiteName, ItemType.SUITE);
         rq.setDescription(suiteDesc);
-        Launch myLaunch = Launch.currentLaunch();
+        Launch myLaunch = launch.get();
         final Maybe<String> item = myLaunch.startTestItem(rq);
         return item;
     }
 
 
     public void finishTestSuite(ItemStatus status) {
-        Maybe<String> rpId = Launch.currentLaunch().getStepReporter().getParent();
-        Launch myLaunch = Launch.currentLaunch();
+        Maybe<String> rpId = launch.get().getStepReporter().getParent();
+        Launch myLaunch = launch.get();
         if (null != rpId) {
             FinishTestItemRQ rq = buildFinishTestSuiteRq(status);
             myLaunch.finishTestItem(rpId, rq);
@@ -80,7 +98,7 @@ public class ReportPortalServer {
 
 
     public Maybe<String> startTest(StartTestItemRQ testItemRQ) {
-        Launch myLaunch = Launch.currentLaunch();
+        Launch myLaunch = launch.get();
         Maybe<String> rpId = myLaunch.getStepReporter().getParent();
         final Maybe<String> testID = myLaunch.startTestItem(rpId, testItemRQ);
         return testID;
@@ -88,18 +106,18 @@ public class ReportPortalServer {
 
 
     public void finishTest(ItemStatus testContext ) {
-        Maybe<String> rpId = Launch.currentLaunch().getStepReporter().getParent();
+        Maybe<String> rpId = launch.get().getStepReporter().getParent();
         FinishTestItemRQ rq = buildFinishTestRq(testContext);
-        Launch.currentLaunch().finishTestItem(rpId, rq);
+        launch.get().finishTestItem(rpId, rq);
     }
 
 
-    public static void sendLog(String desc, LogLevel level) {
-        ItemTreeReporter.sendLog(Launch.currentLaunch().getClient(), level.name(), desc, Calendar.getInstance().getTime(), Launch.currentLaunch().getLaunch(), TestItemTree.createTestItemLeaf(Launch.currentLaunch().getStepReporter().getParent()));
+    public  void sendLog(String desc, LogLevel level) {
+        ItemTreeReporter.sendLog(launch.get().getClient(), level.name(), desc, Calendar.getInstance().getTime(), launch.get().getLaunch(), TestItemTree.createTestItemLeaf(launch.get().getStepReporter().getParent()));
     }
 
-    public static void sendLog( String desc, LogLevel level, File file) {
-        ItemTreeReporter.sendLog(Launch.currentLaunch().getClient(), level.name(), desc, Calendar.getInstance().getTime(), file, Launch.currentLaunch().getLaunch(), TestItemTree.createTestItemLeaf(Launch.currentLaunch().getStepReporter().getParent()));
+    public  void sendLog( String desc, LogLevel level, File file) {
+        ItemTreeReporter.sendLog(launch.get().getClient(), level.name(), desc, Calendar.getInstance().getTime(), file, launch.get().getLaunch(), TestItemTree.createTestItemLeaf(launch.get().getStepReporter().getParent()));
 
 
     }
@@ -139,7 +157,7 @@ public class ReportPortalServer {
 
     protected StartTestItemRQ buildStartItemRq(String itemName, ItemType itemType) {
         StartTestItemRQ rq = new StartTestItemRQ();
-        rq.setLaunchUuid(Launch.currentLaunch().getLaunch().blockingGet());
+        rq.setLaunchUuid(launch.get().getLaunch().blockingGet());
         rq.setName(itemName);
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType(itemType.name());

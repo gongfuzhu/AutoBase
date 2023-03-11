@@ -21,12 +21,9 @@ import java.lang.reflect.Parameter;
 @Component
 @Aspect
 @Log4j2
-@Import(ReportPortalServer.class)
 public class ReportAop {
 
 
-    @Autowired
-    ReportPortalServer reportPortalServer;
     @Autowired
     ReportPortal reportPortal;
 
@@ -41,7 +38,8 @@ public class ReportAop {
         String suitName = report.suitName().isEmpty() ? signature.getName() : report.suitName();
 
 
-        reportPortalServer.initReport(reportPortal, report.desc());
+        ReportPortalServer reportPortalServer = new ReportPortalServer(reportPortal);
+
         reportPortalServer.startLaunch();
 
         StartTestItemRQ testSuit = reportPortalServer.buildStartItemRq(suitName, ItemType.SUITE);

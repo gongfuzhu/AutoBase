@@ -21,6 +21,7 @@ import lombok.extern.log4j.Log4j2;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -32,7 +33,11 @@ public class ReportPortalServer {
 
     private final @Getter MemoizingSupplier<Launch> launch;
     private volatile Thread shutDownHook;
-    private  Thread getShutdownHook(final Supplier<Launch> launch) {
+
+    private final AtomicBoolean isLaunchFailed = new AtomicBoolean();
+
+
+    private Thread getShutdownHook(final Supplier<Launch> launch) {
         return new Thread(() -> {
             FinishExecutionRQ rq = new FinishExecutionRQ();
             rq.setEndTime(Calendar.getInstance().getTime());
@@ -59,17 +64,16 @@ public class ReportPortalServer {
     }
 
 
-
-
-    public Maybe<String> startLaunch(){
+    public Maybe<String> startLaunch() {
         return launch.get().start();
     }
 
     public void finishLaunch(ItemStatus itemStatus) {
         FinishExecutionRQ rq = new FinishExecutionRQ();
         rq.setEndTime(Calendar.getInstance().getTime());
-        rq.setStatus(itemStatus.name());
+        rq.setStatus(isLaunchFailed.get() ? ItemStatus.FAILED.name() : ItemStatus.PASSED.name());
         launch.get().finish(rq);
+        launch.reset();
         Runtime.getRuntime().removeShutdownHook(shutDownHook);
     }
 
@@ -89,10 +93,6 @@ public class ReportPortalServer {
         if (null != rpId) {
             FinishTestItemRQ rq = buildFinishTestSuiteRq(status);
             myLaunch.finishTestItem(rpId, rq);
-        }else {
-
-            log.warn("rpId等于空");
-
         }
     }
 
@@ -105,19 +105,19 @@ public class ReportPortalServer {
     }
 
 
-    public void finishTest(ItemStatus testContext ) {
+    public void finishTest(ItemStatus testContext) {
         Maybe<String> rpId = launch.get().getStepReporter().getParent();
         FinishTestItemRQ rq = buildFinishTestRq(testContext);
         launch.get().finishTestItem(rpId, rq);
     }
 
 
-    public  void sendLog(String desc, LogLevel level) {
-        ItemTreeReporter.sendLog(launch.get().getClient(), level.name(), desc, Calendar.getInstance().getTime(), launch.get().getLaunch(), TestItemTree.createTestItemLeaf(launch.get().getStepReporter().getParent()));
+    public static void sendLog(String desc, LogLevel level) {
+        ReportPortal.emitLog(desc, level.name(), new Date());
     }
 
-    public  void sendLog( String desc, LogLevel level, File file) {
-        ItemTreeReporter.sendLog(launch.get().getClient(), level.name(), desc, Calendar.getInstance().getTime(), file, launch.get().getLaunch(), TestItemTree.createTestItemLeaf(launch.get().getStepReporter().getParent()));
+    public static void sendLog(String desc, LogLevel level, File file) {
+        ReportPortal.emitLog(desc, level.name(), new Date(), file);
 
 
     }
@@ -170,8 +170,6 @@ public class ReportPortalServer {
         rq.setStatus(itemStatus.name());
         return rq;
     }
-
-
 
 
 }

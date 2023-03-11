@@ -1,6 +1,6 @@
 package com.gongfuzhu.report.core.service;
 
-import com.gongfuzhu.autotools.core.reportannotation.Test;
+import com.gongfuzhu.autotools.core.reportannotation.TestMethod;
 import com.gongfuzhu.autotools.core.selenium.WebDriverServer;
 import com.gongfuzhu.report.core.step.SendLog;
 import lombok.extern.log4j.Log4j2;
@@ -25,7 +25,8 @@ public class TestService {
 
 
 
-    @Test(testName = "上传测试附件测试")
+    @TestMethod(testName = "上传测试附件测试")
+//    @Step
     public void logFile(String aaa, int ddd){
 
         log.info("上传图片，时间：{}",new Date());
@@ -39,21 +40,21 @@ public class TestService {
 
     }
 
-    @Test(testName = "异常信息")
+    @TestMethod(testName = "异常信息")
     public void logException(){
         log.warn("异常信息");
         testSetp.exception();
 
     }
 
-    @Test(testName = "断言测试",desc = "这是断言描述")
+    @TestMethod(testName = "断言测试",desc = "这是断言描述")
     public void logAssert(){
         log.warn("断言");
         testSetp.assertFail();
     }
 
 
-    @Test
+    @TestMethod
     public void seleniumTest(WebDriver driver ){
 
         driver.get("https://www.baidu.com");

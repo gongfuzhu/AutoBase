@@ -2,32 +2,29 @@ package com.gongfuzhu.autotools.core.reportannotation.aop;
 
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
-import com.epam.reportportal.service.Launch;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
-import com.gongfuzhu.autotools.core.reportannotation.Test;
+import com.gongfuzhu.autotools.core.reportannotation.TestMethod;
 import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Optional;
 
 @Aspect
 @Log4j2
-public class TestAop {
+public class TestMethodAop {
 
 
     @Pointcut("@annotation(test)")
-    public void point(Test test) {
+    public void point(TestMethod test) {
     }
 
     @Around("point(test)")
-    public Object doAround(ProceedingJoinPoint pjp, Test test) throws Throwable {
+    public Object doAround(ProceedingJoinPoint pjp, TestMethod test) throws Throwable {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
 
@@ -40,17 +37,14 @@ public class TestAop {
         StringBuilder info = info(pjp, desc);
 
         // launch > suit > test > setp
-        Launch launch = Launch.currentLaunch();
-        Optional.ofNullable(launch).ifPresent(it -> {
-            StartTestItemRQ testItemRQ = reportPortalServer.buildStartItemRq(testName, ItemType.STEP);
-            testItemRQ.setDescription(info.toString());
-            String methodPath = pjp.getSignature().getName();
-            testItemRQ.setCodeRef(methodPath);
-            testItemRQ.setTestCaseId(methodPath);
-            testItemRQ.setDescription(desc);
-            reportPortalServer.startTest(testItemRQ);
+        StartTestItemRQ testItemRQ = reportPortalServer.buildStartItemRq(testName, ItemType.STEP);
+        testItemRQ.setDescription(info.toString());
+        String methodPath = pjp.getSignature().getName();
+        testItemRQ.setCodeRef(methodPath);
+        testItemRQ.setTestCaseId(methodPath);
+        testItemRQ.setDescription(desc);
+        reportPortalServer.startTest(testItemRQ);
 
-        });
 
         Object[] args = pjp.getArgs();
 
@@ -59,7 +53,7 @@ public class TestAop {
         try {
             proceed = pjp.proceed(args);
         } catch (Throwable e) {
-            log.fatal("exceptionT：",e);
+            log.fatal("exceptionT：", e);
             reportPortalServer.finishTest(ItemStatus.FAILED);
             throw e;
         }

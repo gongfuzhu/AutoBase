@@ -46,9 +46,9 @@ public class ReportPortalServer {
     }
 
 
-    public ReportPortalServer(@Nonnull final ReportPortal reportPortal) {
+    public ReportPortalServer(@Nonnull final ReportPortal reportPortal,ListenerParameters parameters) {
         this.launch = new MemoizingSupplier<>(() -> {
-            StartLaunchRQ startRq = buildStartLaunchRq(reportPortal.getParameters());
+            StartLaunchRQ startRq = buildStartLaunchRq(parameters);
             startRq.setStartTime(Calendar.getInstance().getTime());
             Launch newLaunch = reportPortal.newLaunch(startRq);
             shutDownHook = getShutdownHook(() -> newLaunch);
@@ -98,6 +98,16 @@ public class ReportPortalServer {
 
 
     public Maybe<String> startTest(StartTestItemRQ testItemRQ) {
+        Launch myLaunch = launch.get();
+        Maybe<String> rpId = myLaunch.getStepReporter().getParent();
+        final Maybe<String> testID = myLaunch.startTestItem(rpId, testItemRQ);
+        return testID;
+    }
+    public Maybe<String> startTest(String testName ,String desc,String caseId) {
+        StartTestItemRQ testItemRQ = buildStartItemRq(testName, ItemType.STEP);
+        testItemRQ.setDescription(desc);
+        testItemRQ.setTestCaseId(caseId);
+        testItemRQ.setCodeRef(caseId);
         Launch myLaunch = launch.get();
         Maybe<String> rpId = myLaunch.getStepReporter().getParent();
         final Maybe<String> testID = myLaunch.startTestItem(rpId, testItemRQ);

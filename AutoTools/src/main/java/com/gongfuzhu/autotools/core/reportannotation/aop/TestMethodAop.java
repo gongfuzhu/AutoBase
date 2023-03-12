@@ -28,6 +28,8 @@ public class TestMethodAop {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
 
+        String codeRefer = pjp.getTarget().getClass().getName() + "." + method.getName();
+
 
         String name = method.getName();
         String testName = test.testName().isEmpty() ? name : test.testName();
@@ -37,13 +39,8 @@ public class TestMethodAop {
         StringBuilder info = info(pjp, desc);
 
         // launch > suit > test > setp
-        StartTestItemRQ testItemRQ = reportPortalServer.buildStartItemRq(testName, ItemType.STEP);
-        testItemRQ.setDescription(info.toString());
-        String methodPath = pjp.getSignature().getName();
-        testItemRQ.setCodeRef(methodPath);
-        testItemRQ.setTestCaseId(methodPath);
-        testItemRQ.setDescription(desc);
-        reportPortalServer.startTest(testItemRQ);
+
+        reportPortalServer.startTest(testName,info.toString(),codeRefer);
 
 
         Object[] args = pjp.getArgs();
@@ -71,7 +68,7 @@ public class TestMethodAop {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Object[] args = pjp.getArgs();
         StringBuilder stringBuilder = new StringBuilder();
-        if (!desc.isEmpty()) stringBuilder.append(desc + "\n");
+        if (!desc.isEmpty()) stringBuilder.append("desc:").append(desc + "\n");
 
         if (args.length != 0) {
             stringBuilder.append("parameters:\n");
@@ -79,11 +76,6 @@ public class TestMethodAop {
                 stringBuilder.append("- ").append(parameterTypes[i].getSimpleName()).append(":").append(parameters[i].getName()).append(":").append(args[i].toString()).append("\n");
             }
         }
-
-
-//        if (args.length != 0) Arrays.stream(args).forEach(it -> {
-//            stringBuilder.append(it);
-//        });
 
         return stringBuilder;
 

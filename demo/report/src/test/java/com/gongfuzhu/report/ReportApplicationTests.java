@@ -7,6 +7,7 @@ import com.epam.reportportal.formatting.http.converters.SanitizingUriConverter;
 import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.restassured.ReportPortalRestAssuredLoggingFilter;
 import com.gongfuzhu.autotools.core.reportannotation.Report;
+import com.gongfuzhu.report.core.controller.Testcontroller;
 import com.gongfuzhu.report.core.service.RestfullService;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -18,13 +19,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class ReportApplicationTests {
 
+
     @Autowired
-    RestfullService restfullService;
+    Testcontroller testcontroller;
     @Test
-
     void contextLoads() {
-        restfullService.demo();
+        testcontroller.re();
 
+//        testcontroller.log1();
     }
 
 

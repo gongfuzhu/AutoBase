@@ -1,8 +1,18 @@
 package com.gongfuzhu.report.core.controller;
 
+import com.epam.reportportal.formatting.http.converters.DefaultHttpHeaderConverter;
+import com.epam.reportportal.formatting.http.converters.SanitizingCookieConverter;
+import com.epam.reportportal.formatting.http.converters.SanitizingHttpHeaderConverter;
+import com.epam.reportportal.formatting.http.converters.SanitizingUriConverter;
+import com.epam.reportportal.listeners.LogLevel;
+import com.epam.reportportal.restassured.ReportPortalRestAssuredLoggingFilter;
 import com.gongfuzhu.autotools.core.reportannotation.Report;
 import com.gongfuzhu.autotools.core.reportannotation.SeleniumDriver;
+import com.gongfuzhu.report.core.service.RestfullService;
 import com.gongfuzhu.report.core.service.TestService;
+import io.restassured.RestAssured;
+import io.restassured.internal.ResponseSpecificationImpl;
+import io.restassured.specification.ResponseSpecification;
 import lombok.extern.log4j.Log4j2;
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +25,8 @@ public class Testcontroller {
 
 
 
+    @Autowired
+    RestfullService restfullService;
     @Autowired
 
     TestService testService;
@@ -45,5 +57,21 @@ public class Testcontroller {
     @Report(suitName = "UI测试",desc = "UI测试")
     public void seleniumTest(WebDriver webDriver){
         testService.seleniumTest(webDriver);
+    }
+    @RequestMapping("re")
+    @Report(suitName = "接口测试",desc = "接口测试-描述")
+    public void re(){
+        RestAssured.reset();
+        RestAssured.baseURI = "http://222.180.202.110:4141";
+        RestAssured.filters(new ReportPortalRestAssuredLoggingFilter(
+                42,
+                LogLevel.INFO,
+                SanitizingHttpHeaderConverter.INSTANCE,
+                DefaultHttpHeaderConverter.INSTANCE,
+                SanitizingCookieConverter.INSTANCE,
+                SanitizingUriConverter.INSTANCE
+        ));
+
+        restfullService.demo();
     }
 }

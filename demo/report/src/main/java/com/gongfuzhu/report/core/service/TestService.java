@@ -25,8 +25,7 @@ public class TestService {
 
 
 
-    @TestMethod(testName = "上传测试附件测试")
-//    @Step
+    @TestMethod(testName = "上传测试附件测试",desc = "上传测试附件测试,这是描述")
     public void logFile(String aaa, int ddd){
 
         log.info("上传图片，时间：{}",new Date());

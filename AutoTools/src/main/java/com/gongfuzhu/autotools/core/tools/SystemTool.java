@@ -1,17 +1,6 @@
 package com.gongfuzhu.autotools.core.tools;
 
-import com.google.common.net.MediaType;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import io.github.bonigarcia.wdm.config.DriverManagerType;
-import org.junit.jupiter.api.Assertions;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.HasDevTools;
-import org.openqa.selenium.devtools.NetworkInterceptor;
-import org.openqa.selenium.devtools.v108.network.Network;
 import org.openqa.selenium.net.PortProber;
-import org.openqa.selenium.remote.http.HttpResponse;
-import org.openqa.selenium.remote.http.Route;
 
 import java.io.File;
 

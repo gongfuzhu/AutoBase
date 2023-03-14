@@ -6,28 +6,44 @@ import com.epam.reportportal.formatting.http.converters.SanitizingHttpHeaderConv
 import com.epam.reportportal.formatting.http.converters.SanitizingUriConverter;
 import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.restassured.ReportPortalRestAssuredLoggingFilter;
-import com.gongfuzhu.autotools.core.reportannotation.Report;
 import com.gongfuzhu.autotools.core.reportannotation.TestMethod;
+import com.gongfuzhu.report.core.step.Restfull;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.List;
+
+import static org.hamcrest.Matchers.equalTo;
+
 @Service
+@Log4j2
 public class RestfullService {
 
-    @TestMethod(testName = "form",desc = "登录")
+    @Autowired
+    Restfull restfull;
+    @TestMethod(testName = "获取launch 列表",desc = "登录")
     public void demo() {
 
-        Response post = RestAssured.given()
-                .formParam("grant_type", "password")
-                .formParam("username", "superadmin")
-                .formParam("password", "erebus")
-                .contentType(ContentType.URLENC)
-//                .header("Authorization","Basic dWk6dWltYW4=")
-                .post("uat/sso/oauth/token");
-        post.then().statusCode(200);
-        System.out.println(post.body().print());
+
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        stringObjectHashMap.put("grant_type","password");
+        stringObjectHashMap.put("username","superadmin");
+        stringObjectHashMap.put("password","erebus");
+        String token = restfull.login(stringObjectHashMap);
+
+        log.info("token:{}",token);
+
+        List list = restfull.launchList(token);
+
+        list.forEach(it->{
+            log.info(it);
+
+        });
 
 
     }

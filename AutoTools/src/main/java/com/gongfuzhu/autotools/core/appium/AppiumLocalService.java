@@ -1,4 +1,4 @@
-package com.gongfuzhu.autotools.core.server;
+package com.gongfuzhu.autotools.core.appium;
 
 import com.gongfuzhu.autotools.core.appium.driver.FindDevices;
 import io.appium.java_client.service.local.AppiumDriverLocalService;

@@ -11,6 +11,7 @@ import com.gongfuzhu.autotools.core.reportannotation.SeleniumDriver;
 import com.gongfuzhu.report.core.service.RestfullService;
 import com.gongfuzhu.report.core.service.TestService;
 import io.restassured.RestAssured;
+import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.internal.ResponseSpecificationImpl;
 import io.restassured.specification.ResponseSpecification;
 import lombok.extern.log4j.Log4j2;
@@ -59,7 +60,7 @@ public class Testcontroller {
         testService.seleniumTest(webDriver);
     }
     @RequestMapping("re")
-    @Report(suitName = "接口测试",desc = "接口测试-描述")
+    @Report(suitName = "接口测试demo",desc = "接口测试-描述")
     public void re(){
         RestAssured.reset();
         RestAssured.baseURI = "http://222.180.202.110:4141";
@@ -71,6 +72,7 @@ public class Testcontroller {
                 SanitizingCookieConverter.INSTANCE,
                 SanitizingUriConverter.INSTANCE
         ));
+        RestAssured.responseSpecification = new ResponseSpecBuilder().expectStatusCode(200).build();
 
         restfullService.demo();
     }

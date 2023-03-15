@@ -10,8 +10,8 @@ import com.google.common.io.Resources;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
-import org.junit.Assert;
-//import org.springframework.util.Assert;
+//import org.junit.Assert;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.Date;
@@ -62,7 +62,7 @@ public class SendLog {
         ReportPortal.emitLog("方法一", "error", new Date(), file);
         ReportPortal.emitLaunchLog("方法一", "error", new Date(), file);
 //        LoggingTools.log(file,"方法二");
-//        ReportPortalServer.sendLog("方法三", LogLevel.ERROR,file);
+        ReportPortalServer.sendLog("方法三", LogLevel.ERROR,file);
 
     }
 
@@ -80,8 +80,8 @@ public class SendLog {
         log.info("下面是true断言");
         // 使用Junit 断言
 
-        Assert.fail("这里被断言了");
-//        Assert.isTrue(false,"这里被断言了");
+//        Assert.fail("这里被断言了");
+        Assert.isTrue(false,"这里被断言了");
 //        Assert.isTrue(false,"断言失败消息");
 
 

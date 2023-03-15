@@ -94,7 +94,7 @@ public class WebDriverServer {
         log.info("视频path：{}", videoPath);
         Optional.ofNullable(taskMode.getWebDriver()).ifPresent(it -> it.quit());
         Optional.ofNullable(taskMode.getWebDriverManager()).ifPresent(it -> it.quit());
-        Optional.ofNullable(taskMode.getWebDriverManager()).ifPresent(it -> ReportPortalServer.sendLog("过程视频", LogLevel.INFO, new File(videoPath)));
+        Optional.ofNullable(videoPath).ifPresent(it -> ReportPortalServer.sendLog("过程视频", LogLevel.INFO, new File(videoPath)));
         this.CURRENT_TaskMode.remove();
 
 

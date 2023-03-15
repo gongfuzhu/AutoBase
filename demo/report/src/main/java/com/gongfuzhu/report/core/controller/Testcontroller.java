@@ -71,8 +71,18 @@ public class Testcontroller {
     public void demo(){
 
         testService.logFile("admin",123);
-        testService.logException();
-        testService.logAssert();
+        try {
+
+            testService.logException();
+        }catch (Exception e){
+
+        }
+        try {
+
+            testService.logAssert();
+        }catch (Exception e){
+
+        }
         testService.seleniumTest();
 
         RestAssured.reset();

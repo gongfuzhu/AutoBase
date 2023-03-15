@@ -35,7 +35,7 @@ public class TestService {
         testSetp.css();
         log.info("上传zip");
         testSetp.zip();
-//        testSetp.mp4();
+        testSetp.mp4();
 
 
 
@@ -55,7 +55,7 @@ public class TestService {
     }
 
 
-    @TestMethod(testName = "UI测试")
+    @TestMethod(testName = "UI测试demo",desc = "UI测试")
     @SeleniumDriver
     public void seleniumTest( ){
 

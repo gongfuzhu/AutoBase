@@ -26,7 +26,7 @@ public class RestfullService {
 
     @Autowired
     Restfull restfull;
-    @TestMethod(testName = "获取launch 列表",desc = "登录")
+    @TestMethod(testName = "获取launch 列表",desc = "接口测试")
     public void demo() {
 
 

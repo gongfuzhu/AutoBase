@@ -24,9 +24,9 @@ class ReportApplicationTests {
     Testcontroller testcontroller;
     @Test
     void contextLoads() {
-        testcontroller.re();
+//        testcontroller.re();
 
-//        testcontroller.log1();
+        testcontroller.log1();
     }
 
 

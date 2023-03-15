@@ -13,6 +13,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Optional;
 
 @Aspect
 @Log4j2
@@ -73,7 +74,10 @@ public class TestMethodAop {
         if (args.length != 0) {
             stringBuilder.append("parameters:\n");
             for (int i = 0; i < parameters.length; i++) {
-                stringBuilder.append("- ").append(parameterTypes[i].getSimpleName()).append(":").append(parameters[i].getName()).append(":").append(args[i].toString()).append("\n");
+                int finalI = i;
+                Optional.ofNullable(args[finalI]).ifPresent(it->{
+                    stringBuilder.append("- ").append(parameterTypes[finalI].getSimpleName()).append(":").append(parameters[finalI].getName()).append(":").append(args[finalI].toString()).append("\n");
+                });
             }
         }
 

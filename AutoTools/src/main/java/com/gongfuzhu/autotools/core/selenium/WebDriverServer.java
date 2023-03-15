@@ -1,5 +1,8 @@
 package com.gongfuzhu.autotools.core.selenium;
 
+import com.epam.reportportal.listeners.LogLevel;
+import com.epam.reportportal.service.ReportPortal;
+import com.gongfuzhu.autotools.core.reportannotation.aop.ReportPortalServer;
 import com.gongfuzhu.autotools.core.selenium.options.ChromeGeneralOptions;
 import com.gongfuzhu.autotools.core.tools.SystemTool;
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -11,6 +14,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -19,6 +23,8 @@ public class WebDriverServer {
 
 
     private String catchPath = "/tmp/catch";
+
+    private String videoPath;
 
 
     private static @Getter ThreadLocal<driverMode> CURRENT_TaskMode = ThreadLocal.withInitial(() -> null);
@@ -69,10 +75,10 @@ public class WebDriverServer {
         WebDriver webDriver;
         WebDriverManager wd = WebDriverManager.getInstance(type).browserInDocker().capabilities(capabilities);
 
-        wd.dockerTmpfsMount(catchPath + File.separator + "mount" + File.separator);
-
+//        wd.dockerTmpfsMount(catchPath + File.separator + "mount" + File.separator);
+        videoPath = catchPath + File.separator + "video" + File.separator + System.currentTimeMillis() + ".mp4";
         wd.dockerScreenResolution("1920x1080x24").enableRecording().enableVnc();
-        wd.dockerRecordingOutput(catchPath + File.separator + "video" + File.separator + System.currentTimeMillis() + ".mp4");
+        wd.dockerRecordingOutput(videoPath);
         webDriver = wd.create();
         this.CURRENT_TaskMode.set(new driverMode(webDriver, wd));
         return generalSettings(webDriver);
@@ -85,8 +91,10 @@ public class WebDriverServer {
         //等待录制功能结束
         Thread.sleep(5000);
         driverMode taskMode = this.CURRENT_TaskMode.get();
-        Optional.ofNullable(taskMode.getWebDriver()).ifPresent(it->it.quit());
-        Optional.ofNullable(taskMode.getWebDriverManager()).ifPresent(it->it.quit());
+        log.info("视频path：{}", videoPath);
+        Optional.ofNullable(taskMode.getWebDriver()).ifPresent(it -> it.quit());
+        Optional.ofNullable(taskMode.getWebDriverManager()).ifPresent(it -> it.quit());
+        Optional.ofNullable(taskMode.getWebDriverManager()).ifPresent(it -> ReportPortalServer.sendLog("过程视频", LogLevel.INFO, new File(videoPath)));
         this.CURRENT_TaskMode.remove();
 
 

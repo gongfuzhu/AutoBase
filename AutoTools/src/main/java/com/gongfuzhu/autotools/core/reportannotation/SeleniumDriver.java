@@ -3,6 +3,7 @@ package com.gongfuzhu.autotools.core.reportannotation;
 import com.gongfuzhu.autotools.core.selenium.options.ChromeGeneralOptions;
 import io.github.bonigarcia.wdm.config.DriverManagerType;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.core.annotation.Order;
 
 import java.lang.annotation.*;
 
@@ -10,6 +11,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
+@Order(3)
 public @interface SeleniumDriver {
 
 

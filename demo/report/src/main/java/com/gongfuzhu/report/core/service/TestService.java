@@ -1,5 +1,6 @@
 package com.gongfuzhu.report.core.service;
 
+import com.gongfuzhu.autotools.core.reportannotation.SeleniumDriver;
 import com.gongfuzhu.autotools.core.reportannotation.TestMethod;
 import com.gongfuzhu.autotools.core.selenium.WebDriverServer;
 import com.gongfuzhu.report.core.step.SendLog;
@@ -26,7 +27,7 @@ public class TestService {
 
 
     @TestMethod(testName = "上传测试附件测试",desc = "上传测试附件测试,这是描述")
-    public void logFile(String aaa, int ddd){
+    public void logFile(String key, int value){
 
         log.info("上传图片，时间：{}",new Date());
         testSetp.jpg();
@@ -34,6 +35,7 @@ public class TestService {
         testSetp.css();
         log.info("上传zip");
         testSetp.zip();
+//        testSetp.mp4();
 
 
 
@@ -53,9 +55,11 @@ public class TestService {
     }
 
 
-    @TestMethod
-    public void seleniumTest(WebDriver driver ){
+    @TestMethod(testName = "UI测试")
+    @SeleniumDriver
+    public void seleniumTest( ){
 
+        WebDriver driver = WebDriverServer.getCURRENT_TaskMode().get().getWebDriver();
         driver.get("https://www.baidu.com");
         // 获取搜索框元素
         WebElement searchBox = driver.findElement(By.name("wd"));
@@ -77,6 +81,8 @@ public class TestService {
         log.info("执行完毕，{}",System.currentTimeMillis());
 
     }
+
+
 
 
 

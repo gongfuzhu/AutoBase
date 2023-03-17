@@ -72,10 +72,11 @@ public class WebDriverServer {
     private WebDriver dockerDriver(DriverManagerType type, ChromeOptions capabilities) {
 
 
+        capabilities.addArguments("--user-data-dir=/tmp/google");
         WebDriver webDriver;
         WebDriverManager wd = WebDriverManager.getInstance(type).browserInDocker().capabilities(capabilities);
 
-//        wd.dockerTmpfsMount(catchPath + File.separator + "mount" + File.separator);
+        wd.dockerVolumes("googles:/tmp/google");
         videoPath = catchPath + File.separator + "video" + File.separator + System.currentTimeMillis() + ".mp4";
         wd.dockerScreenResolution("1920x1080x24").enableRecording().enableVnc();
         wd.dockerRecordingOutput(videoPath);

@@ -24,6 +24,9 @@ public class ChromeArguments {
     //打开开发者工具F12
     public static String devtools="--auto-open-devtools-for-tabs";
 
+    //Chrome11
+    public static String origins="--remote-allow-origins=*";
+
 
 
 

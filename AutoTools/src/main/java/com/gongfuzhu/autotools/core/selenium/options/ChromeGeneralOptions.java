@@ -64,7 +64,7 @@ public class ChromeGeneralOptions {
     }
 
     private static void generaSet(ChromeOptions chromeOptions){
-        chromeOptions.addArguments( ChromeArguments.disableBlinkFeatures, ChromeArguments.automationControlled);
+        chromeOptions.addArguments( ChromeArguments.disableBlinkFeatures, ChromeArguments.automationControlled,ChromeArguments.origins);
         //禁止弹窗提示
         chromeOptions.setExperimentalOption("excludeSwitches",new String[]{"enable-automation"});
         chromeOptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);

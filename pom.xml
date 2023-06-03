@@ -21,6 +21,7 @@
 
         <module>AutoTools</module>
         <module>demo/report</module>
+        <module>application/kailin</module>
     </modules>
 
 </project>

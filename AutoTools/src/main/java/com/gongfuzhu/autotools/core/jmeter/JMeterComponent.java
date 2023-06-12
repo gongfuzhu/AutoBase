@@ -1,5 +1,6 @@
 package com.gongfuzhu.autotools.core.jmeter;
 
+import lombok.SneakyThrows;
 import org.apache.jmeter.assertions.JSR223Assertion;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.config.gui.ArgumentsPanel;
@@ -12,14 +13,18 @@ import org.apache.jmeter.protocol.http.control.gui.HttpTestSampleGui;
 import org.apache.jmeter.protocol.http.gui.CookiePanel;
 import org.apache.jmeter.protocol.http.gui.HeaderPanel;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
+import org.apache.jmeter.report.dashboard.ReportGenerator;
 import org.apache.jmeter.reporters.ResultCollector;
 import org.apache.jmeter.testbeans.gui.TestBeanGUI;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.testelement.TestPlan;
 import org.apache.jmeter.threads.gui.ThreadGroupGui;
+import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.visualizers.ViewResultsFullVisualizer;
 import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jorphan.collections.HashTree;
+
+import java.io.File;
 
 /**
  *
@@ -91,9 +96,33 @@ import org.apache.jorphan.collections.HashTree;
 public class JMeterComponent {
 
 
+    @SneakyThrows
+    public static void main(String[] args) {
+
+        JMeterComponent.creatTestPlan("D:\\apache-jmeter-5.5");
+        ResultCollector resultCollector = new ResultCollector();
+        resultCollector.setFilename("");
+        ReportGenerator reportGenerator = new ReportGenerator("D:\\scan\\script\\report\\demo.jmx20230531172217\\demo.jmx20230531172217.jtl", resultCollector);
+        reportGenerator.generate();
+    }
+    //生成报告
+    @SneakyThrows
+    public static  void reportGenerator(){
+
+        ReportGenerator reportGenerator = new ReportGenerator("", null);
+
+    }
 
 
-        public static TestPlan creatTestPlan(){
+        public static TestPlan creatTestPlan(String jmeterPath){
+
+
+            JMeterUtils.setJMeterHome(jmeterPath);
+            JMeterUtils.loadJMeterProperties(jmeterPath + File.separator + "bin" + File.separator + "jmeter.properties");
+            // 可以注释这一行，查看额外的日志，例如DEBUG级别
+            JMeterUtils.initLogging();
+            JMeterUtils.initLocale();
+
             TestPlan testPlan = new TestPlan("创建JMeter脚本");
             testPlan.setProperty(TestElement.TEST_CLASS, TestPlan.class.getName());
             testPlan.setProperty(TestElement.GUI_CLASS, TestPlanGui.class.getName());

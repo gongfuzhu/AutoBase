@@ -6,6 +6,7 @@ import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.gongfuzhu.autotools.core.reportannotation.Report;
+import com.gongfuzhu.autotools.core.reportannotation.util.ReportUtil;
 import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -55,7 +56,7 @@ public class ReportAop {
         reportPortalServer.startLaunch();
 
 
-        reportPortalServer.startTestSuite(suitName, info(pjp).toString());
+//        reportPortalServer.startTestSuite(suitName, info(pjp).toString());
 
 
         Object[] args = pjp.getArgs();
@@ -65,11 +66,13 @@ public class ReportAop {
 
         try {
             proceed = pjp.proceed(args);
-            reportPortalServer.finishTestSuite(ItemStatus.PASSED);
+
+//            reportPortalServer.finishTestSuite(ItemStatus.PASSED);
+
             reportPortalServer.finishLaunch(ItemStatus.PASSED);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.fatal("exceptionR：", e);
-            reportPortalServer.finishTestSuite(ItemStatus.FAILED);
+//            reportPortalServer.finishTestSuite(ItemStatus.FAILED);
             reportPortalServer.finishLaunch(ItemStatus.FAILED);
             throw e;
         }

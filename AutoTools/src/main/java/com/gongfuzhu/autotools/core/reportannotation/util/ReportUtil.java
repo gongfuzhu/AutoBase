@@ -3,6 +3,7 @@ package com.gongfuzhu.autotools.core.reportannotation.util;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.Launch;
+import com.epam.reportportal.service.step.StepRequestUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import io.reactivex.Maybe;
@@ -52,20 +53,56 @@ public class ReportUtil {
 
     }
 
+
+    /**
+     * 开始步骤
+     * @param stepName  步骤名称
+     */
+
+    public static void startStep(String stepName) {
+
+        ofNullable(Launch.currentLaunch()).ifPresent(l -> l.getStepReporter().startNestedStep(StepRequestUtils.buildStartStepRequest(stepName, "")));
+
+    }
+
+    /**
+     * 开始步骤
+     * @param stepName 步骤名称
+     * @param desc 描述
+     */
+    public static void startStep(String stepName,String desc) {
+
+        ofNullable(Launch.currentLaunch()).ifPresent(l -> l.getStepReporter().startNestedStep(StepRequestUtils.buildStartStepRequest(stepName, desc)));
+
+    }
+
+
+
+    /**
+     * 结束步骤
+     * @param status 状态
+     */
     public static void stopTestIt(ItemStatus status) {
 
-        ofNullable(Launch.currentLaunch()).ifPresent(l -> {
+        ofNullable(Launch.currentLaunch()).ifPresent(l -> l.getStepReporter().finishNestedStep(status));
 
-            Maybe<String> rpId = l.getStepReporter().getParent();
-            FinishTestItemRQ rq = buildFinishTestRq(status);
-            l.finishTestItem(rpId, rq);
+    }
 
+    /**
+     * 结束步骤
+     * @param throwable 异常信息
+     */
+    public static void stopTestIt(Throwable throwable) {
 
-        });
+        ofNullable(Launch.currentLaunch()).ifPresent(l -> l.getStepReporter().finishNestedStep(throwable));
 
 
     }
 
+    /**
+     * 结束步骤
+     * @param finishTestItemRQ
+     */
     public static void stopTestIt(FinishTestItemRQ finishTestItemRQ) {
 
         ofNullable(Launch.currentLaunch()).ifPresent(l -> {
@@ -78,24 +115,10 @@ public class ReportUtil {
     }
 
 
-    public static void startStep(String stepName) {
 
-        ofNullable(Launch.currentLaunch()).ifPresent(l -> l.getStepReporter().startNestedStep(buildStartItemRq(stepName, ItemType.STEP)));
-
-    }
-
-
-    public static void stopStep(Throwable throwable) {
-        if (null == throwable) {
-
-            ofNullable(Launch.currentLaunch()).ifPresent(l -> l.getStepReporter().finishNestedStep());
-        } else {
-            ofNullable(Launch.currentLaunch()).ifPresent(l -> l.getStepReporter().finishNestedStep(throwable));
-        }
-
-    }
 
     public static StartTestItemRQ buildStartItemRq(String itemName, ItemType itemType) {
+
         StartTestItemRQ rq = new StartTestItemRQ();
         rq.setLaunchUuid(Launch.currentLaunch().getLaunch().blockingGet());
         rq.setName(itemName);
@@ -115,10 +138,8 @@ public class ReportUtil {
     }
 
     public static FinishTestItemRQ buildFinishTestRq(ItemStatus itemStatus) {
-        FinishTestItemRQ rq = new FinishTestItemRQ();
-        rq.setEndTime(Calendar.getInstance().getTime());
-        rq.setStatus(itemStatus.name());
-        return rq;
+
+        return StepRequestUtils.buildFinishTestItemRequest(itemStatus);
     }
 
 

@@ -68,10 +68,19 @@ public class ReportPortalServer {
         return launch.get().start();
     }
 
-    public void finishLaunch(ItemStatus itemStatus) {
+    public void finishLaunch() {
         FinishExecutionRQ rq = new FinishExecutionRQ();
         rq.setEndTime(Calendar.getInstance().getTime());
         rq.setStatus(isLaunchFailed.get() ? ItemStatus.FAILED.name() : ItemStatus.PASSED.name());
+        launch.get().finish(rq);
+        launch.reset();
+        Runtime.getRuntime().removeShutdownHook(shutDownHook);
+    }
+
+    public void finishLaunch(ItemStatus itemStatus) {
+        FinishExecutionRQ rq = new FinishExecutionRQ();
+        rq.setEndTime(Calendar.getInstance().getTime());
+        rq.setStatus(itemStatus.name());
         launch.get().finish(rq);
         launch.reset();
         Runtime.getRuntime().removeShutdownHook(shutDownHook);

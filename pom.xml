@@ -16,7 +16,7 @@
     </properties>
     <modules>
         <module>config</module>
-        <module>data</module>
+<!--        <module>data</module>-->
 
 
         <module>AutoTools</module>

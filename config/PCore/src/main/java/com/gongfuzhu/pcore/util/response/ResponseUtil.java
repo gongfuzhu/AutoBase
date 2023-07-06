@@ -34,7 +34,7 @@ public class ResponseUtil {
     @SneakyThrows
     private static void initMimeType() {
         @Cleanup InputStream inputStream = ResponseUtil.class.getClassLoader().getResourceAsStream("tomcat/web.xml");
-        WebXmlUtil.readMime(inputStream, extNameMimeMap);
+//        WebXmlUtil.readMime(inputStream, extNameMimeMap);
         log.info("mime : [" + extNameMimeMap.size() + "]");
     }
 

@@ -2,7 +2,9 @@ package com.gongfuzhu.autotools.core.reportannotation.util;
 
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
+import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.service.Launch;
+import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.step.StepRequestUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
@@ -11,6 +13,7 @@ import io.reactivex.Maybe;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Calendar;
+import java.util.Date;
 
 import static java.util.Optional.ofNullable;
 
@@ -142,5 +145,9 @@ public class ReportUtil {
         return StepRequestUtils.buildFinishTestItemRequest(itemStatus);
     }
 
+
+    public static void sendLog(String desc, LogLevel level) {
+        ReportPortal.emitLog(desc, level.name(), new Date());
+    }
 
 }
